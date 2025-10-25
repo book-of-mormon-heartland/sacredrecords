@@ -5,41 +5,31 @@
  * @format
  */
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import React from 'react';
+import { ThemeProvider } from "./context/ThemeContext";
+import { I18nProvider } from "./context/I18nContext";
+import { AuthProvider } from "./context/AuthContext";
+import TabsComponent from './component/TabsComponent'; 
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+
+
+const Stack = createNativeStackNavigator();
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <AuthProvider>
+      <I18nProvider>
+        <ThemeProvider>
+          <NavigationContainer>
+            <TabsComponent />
+          </NavigationContainer>
+        </ThemeProvider>
+      </I18nProvider>
+    </AuthProvider>
   );
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default App;
