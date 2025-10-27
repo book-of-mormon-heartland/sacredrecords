@@ -99,7 +99,20 @@ export const AuthProvider = ({ children }) => {
 
     const googleSignIn = async () => {
         //console.log("google SignIn");
-        try {
+/*
+
+const { idToken } = await GoogleSignin.signIn();
+
+    // Create a Google credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+    // Sign-in the user with the credential
+    return auth().signInWithCredential(googleCredential);
+
+
+
+  */
+       try {
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
             console.log("passed play services");
             let response;

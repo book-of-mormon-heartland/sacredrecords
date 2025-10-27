@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "422742245899",
+    "project_id": "sacred-records",
+    "storage_bucket": "sacred-records.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422742245899:android:ec7fa123941a3f4002fd0e",
+        "android_client_info": {
+          "package_name": "com.sacredrecords"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3j5ZbK9djHQpKWgMSemedrD6yypQrztU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
