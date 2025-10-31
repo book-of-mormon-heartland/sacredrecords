@@ -1,12 +1,12 @@
 import React, { useContext } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreenComponent from './LoginScreenComponent';
-import EditNamesScreenComponent from './EditNamesScreenComponent';
+import HomeScreenComponent from './HomeScreenComponent';
+import CreateCognitoAccountScreenComponent from './CreateCognitoAccountScreenComponent';
+import AccountVerificationScreenComponent from './AccountVerificationScreenComponent';
+import ForgotPasswordScreenComponent from './ForgotPasswordScreenComponent';
 import { useNavigation, navigate } from '@react-navigation/native';
 import { ThemeContext } from '.././context/ThemeContext';
-
-
-
 import { useI18n } from '.././context/I18nContext'; 
 
 const HomeStack = createNativeStackNavigator();
@@ -31,17 +31,42 @@ const HomeStackNavigatorComponent = () => {
         }}
         component={LoginScreenComponent} />
 
-      <HomeStack.Screen name="EditNames" 
+      <HomeStack.Screen name="CreateCognitoAccount"
         options = {{
-          title: translate('update_names'),
-          headerShown: true,
+          title: translate('create_account'),
           headerTitleAlign: 'center',
           tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
           tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
           tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
           tabBarShowLabel: true,
+
         }}
-        component={EditNamesScreenComponent} />
+        component={CreateCognitoAccountScreenComponent} />
+
+      <HomeStack.Screen name="AccountVerification"
+        options = {{
+          title: translate('verify_account'),
+          headerTitleAlign: 'center',
+          tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
+          tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
+          tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
+          tabBarShowLabel: true,
+
+        }}
+        component={AccountVerificationScreenComponent} />
+
+      <HomeStack.Screen name="ForgotPassword"
+        options = {{
+          title: translate('forgot_password'),
+          headerTitleAlign: 'center',
+          tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
+          tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
+          tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
+          tabBarShowLabel: true,
+
+        }}
+        component={ForgotPasswordScreenComponent} />
+
 
     </HomeStack.Navigator>
   );

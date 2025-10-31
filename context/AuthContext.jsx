@@ -4,6 +4,8 @@ var Environment = require('./environment.ts');
 import { Platform } from 'react-native';
 import { useI18n } from '.././context/I18nContext';
 import * as Keychain from 'react-native-keychain'; 
+import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
+
 
 
 export const AuthContext = createContext("");
@@ -81,7 +83,7 @@ export const AuthProvider = ({ children }) => {
             }
             const responseData = await postResponse.json();
             const obj = JSON.parse(responseData);
-            console.log(obj);
+            //console.log(obj);
             
             if(obj.message==="update-jwt-token") {
               //console.log("This is the new jwtToken: " +  obj.jwtToken);
@@ -98,85 +100,13 @@ export const AuthProvider = ({ children }) => {
     }
 
     const googleSignIn = async () => {
-        //console.log("google SignIn");
-/*
-
-const { idToken } = await GoogleSignin.signIn();
-
-    // Create a Google credential with the token
-    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
-    // Sign-in the user with the credential
-    return auth().signInWithCredential(googleCredential);
-
-
-
-  */
        try {
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-            console.log("passed play services");
-            let response;
-            try {
-                let log = {
-                    log: "passed play services" 
-                }
-                await fetch(serverUrl + '/utilities/log', {
-                    method: 'POST',
-                    headers: {
-                    'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(log),
-                });
-                response = await GoogleSignin.signIn();
-                console.log(response);
-                await fetch(serverUrl + '/utilities/log', {
-                    method: 'POST',
-                    headers: {
-                    'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        log: response.data
-                    }),
-                });
-
-
-            } catch (err) {
-
-               await fetch(serverUrl + '/utilities/log', {
-                    method: 'POST',
-                    headers: {
-                    'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        log: err
-                    }),
-                });
-            }
-            //console.log("About to ask about play services");
-            //await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
             //console.log("play services passed")
-            //const response = await GoogleSignin.signIn();
+            const response = await GoogleSignin.signIn();
             //console.log(response);
-            await fetch(serverUrl + '/utilities/log', {
-                    method: 'POST',
-                    headers: {
-                    'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        log: isSuccessResponse(response)
-                    }),
-                });
             if(isSuccessResponse(response)){
                 //console.log("Google Sign-In Success: ", response.data );
-                await fetch(serverUrl + '/utilities/log', {
-                    method: 'POST',
-                    headers: {
-                    'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        log: "next get user object and id token"
-                    }),
-                });
                 let user = response.data.user;
                 let idToken = response.data.idToken;
 
@@ -194,43 +124,12 @@ const { idToken } = await GoogleSignin.signIn();
                     });
                     if (!postResponse.ok) {
 
-
-                        await fetch(serverUrl + '/utilities/log', {
-                            method: 'POST',
-                            headers: {
-                            'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                log: "post response was not okay"
-                            }),
-                        });
-
-
-
-
-
-                        console.log("Response not ok");
+                        //console.log("Response not ok");
                         throw new Error(`HTTP error! status: ${postResponse.status}`);
                     }
                     const responseData = await postResponse.json();
                     const obj = JSON.parse(responseData);
                     //console.log(obj);
-
-                await fetch(serverUrl + '/utilities/log', {
-                    method: 'POST',
-                    headers: {
-                    'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        log: obj
-                    }),
-                });
-
-
-
-
-
-
 
                     if(obj?.language && (obj.language != "")) {
                         //console.log("Language from server: " + obj.language);
@@ -256,45 +155,10 @@ const { idToken } = await GoogleSignin.signIn();
                 } catch (error) {
                     console.log("We got some error here.")
                     console.error('Error:', error);
-
-
-                        await fetch(serverUrl + '/utilities/log', {
-                            method: 'POST',
-                            headers: {
-                            'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                log: error
-                            }),
-                        });
-
-
-
-
-
-
-
                     return "false";
                 }
             } else {
                 //console.log("NOT Successful: ", response.data );
-
-                        await fetch(serverUrl + '/utilities/log', {
-                            method: 'POST',
-                            headers: {
-                            'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                log: "login not successful"
-                            }),
-                        });
-
-
-
-
-
-
-
                 setGoogleMessage( "Not Successful");
                 setUserProfile(undefined);
                 deleteJwtToken();
@@ -365,12 +229,18 @@ const { idToken } = await GoogleSignin.signIn();
         }
     }
 
-    const appleSignIn = async (response) => {
+    const appleSignIn = async (response, userData) => {
         //console.log("appleSignIn");
-        let fullName = "";
-        let givenName = "";
-        let familyName = "";
-        let personsName = ""; 
+        //let fullName = userData?.fullName?.givenName + " " + userData?.fullName?.familyName || "";
+        //let givenName = userData?.fullName?.givenName || "";
+        //let familyName = userData?.fullName?.familyName || "";
+
+
+        let givenName = userData?.fullName?.givenName || "";
+        let familyName = userData?.fullName?.familyName || "";
+        let fullName = `${givenName} ${familyName}`.trim();
+
+        //let personsName = ""; 
         try {
             let idToken = response.identityToken;
             let authorizationCode = response.authorizationCode;
@@ -383,6 +253,7 @@ const { idToken } = await GoogleSignin.signIn();
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    fullName:  fullName,
                     familyName:  familyName,
                     givenName : givenName,
                     idToken : idToken,
@@ -435,8 +306,151 @@ const { idToken } = await GoogleSignin.signIn();
     };
 
 
+
+    const poolData = {
+        UserPoolId: 'us-east-2_Gu5AvTv9i', // replace with your user pool ID
+        ClientId: '6hfre57q3l5b6si19k6d0rt7ej', // replace with your app client ID
+    };
+    const userPool = new CognitoUserPool(poolData);
+
+    
+    const cognitoSignIn = async (Username, Password) => {
+        
+        const user = new CognitoUser({ Username, Pool: userPool });
+        const authDetails = new AuthenticationDetails({ Username, Password });
+        console.log(user);
+
+        const authenticatedUser = await new Promise((resolve, reject) => {
+            user.authenticateUser(authDetails, {
+                onSuccess: async (session) => {
+                    const idToken = session.getIdToken().getJwtToken();
+                    const refreshToken = session.getRefreshToken().getToken();
+                    const accessToken = session.getAccessToken().getJwtToken();
+                    resolve({ idToken, accessToken, refreshToken });
+                    //console.log("user")
+                    //console.log(user);
+                },
+                onFailure: (err) => {
+                    console.log("Failed to login");
+                    reject(err);
+                } ,
+                });
+            });
+        
+        // here we go to the server.  If we got here, the sign in was successful.
+        console.log("Authenticated User:");
+        console.log(authenticatedUser.idToken);
+        try {
+            const postResponse = await fetch(serverUrl + "/authentication/cognitoLogin", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: authenticatedUser.idToken }),
+            });
+            if (!postResponse.ok) {
+
+                console.log("Response not ok");
+                throw new Error(`HTTP error! status: ${postResponse.status}`);
+            }
+            const responseData = await postResponse.json();
+            const obj = JSON.parse(responseData);
+            //console.log(obj);
+            
+            if(obj?.language && (obj.language != "")) {
+                setLanguage(obj.language);
+            }
+
+            if(obj?.jwtToken) {
+                setJwtToken(obj.jwtToken || "");
+                setRefreshToken(obj.refreshToken || "");
+                setGoogleMessage("Logged In Successfully");
+                setUserProfile(user);
+                saveJwtToken(obj.jwtToken);
+                setTemporaryJwtToken("");
+                setTemporaryRefreshToken("");
+                return "true";
+            } else {
+                console.log("No JWT Token returned from server.");
+                setJwtToken("");
+                setRefreshToken("");
+                setGoogleMessage("Not Logged In");
+                setUserProfile();
+                saveJwtToken("");
+                setTemporaryJwtToken("");
+                setTemporaryRefreshToken("");
+                return "false";
+            }
+            
+        } catch (error) {
+            console.log("We got some error here.")
+            console.error('Error:', error);
+            return "false";
+        }
+        return user;
+    };
+
+    const cognitoCreateAccount = async (username, givenName, familyName, fullName, email, password) => {
+      //console.log("cognitoCreateAccount called");
+      // send it to the sserver to create the account.
+      try {
+          const postResponse = await fetch(serverUrl + "/authentication/cognitoCreateAccount", {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ username, givenName, familyName, fullName, email, password }),
+          });
+          if (!postResponse.ok) {
+
+              console.log("Response not ok");
+              throw new Error(`HTTP error! status: ${postResponse.status}`);
+          }
+          const responseData = await postResponse.json();
+          return responseData;
+    
+        } catch (error) { 
+            console.log("We got some error here.")
+            console.error('Error:', error);
+            throw error;
+        }
+    }
+
+    const cognitoVerifyAccount = async (username, verificationCode) => {
+      console.log("cognitoVerifyAccount called");
+      console.log('username');
+      console.log(username);
+      console.log('verificationCode');
+      console.log(verificationCode);
+
+      // send it to the sserver to create the account.
+      try {
+          const postResponse = await fetch(serverUrl + "/authentication/cognitoVerifyAccount", {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ username, verificationCode }),
+          });
+          if (!postResponse.ok) {
+
+              console.log("Response not ok");
+              //throw new Error(`HTTP error! status: ${postResponse.status}`);
+          }
+          const responseData = await postResponse.json();
+           console.log(responseData);
+          return responseData;
+    
+        } catch (error) { 
+            console.log("We got some error here.")
+            console.error('Error:', error);
+            throw error;
+        }
+    }
+
+
     return (
-        <AuthContext.Provider value={{ appleSignIn, googleSignIn, googleSignOut, googleMessage, setGoogleMessage, userProfile, setUserProfile, jwtToken,  setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, refreshJwtToken, setRefreshToken, temporaryJwtToken, setTemporaryJwtToken, temporaryRefreshToken, setTemporaryRefreshToken }}>
+        <AuthContext.Provider value={{ cognitoSignIn, cognitoCreateAccount, cognitoVerifyAccount, appleSignIn, googleSignIn, googleSignOut, googleMessage, setGoogleMessage, userProfile, setUserProfile, jwtToken,  setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, refreshJwtToken, setRefreshToken, temporaryJwtToken, setTemporaryJwtToken, temporaryRefreshToken, setTemporaryRefreshToken }}>
             { children }
         </AuthContext.Provider>
     );

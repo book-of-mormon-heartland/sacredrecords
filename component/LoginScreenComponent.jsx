@@ -7,17 +7,22 @@ import { Platform } from 'react-native';
 import { useI18n } from '.././context/I18nContext'; 
 import { AppleButton, appleAuth } from '@invertase/react-native-apple-authentication';
 import { useNavigation, navigate } from '@react-navigation/native';
+import CognitoLoginScreenComponent from './CognitoLoginScreenComponent.jsx';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 
 const LoginScreenComponent = ( {route} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const { googleSignIn, appleSignIn } = useContext(AuthContext);
+  const { googleSignIn, appleSignIn, cognitoSignIn } = useContext(AuthContext);
   const isIOS = ( Platform.OS === 'ios' );
   const { language, setLanguage, translate } = useI18n();
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const [showPassword, setShowPassword] = useState(false);
   
 
   useEffect(() => {
@@ -39,14 +44,24 @@ const LoginScreenComponent = ( {route} ) => {
       );
 
       if (credentialState === appleAuth.State.AUTHORIZED) {
-        // User is authenticated
-        let message = await appleSignIn( appleAuthRequestResponse);
-        //console.log("Apple login message");
-        //console.log(message);
-        //if(message==="updateProfile") {
-          //navigate here.
-        //  navigation.navigate('EditNames');
-        //}
+        //Extract name/email the first time
+        const { user, email, fullName, identityToken } = appleAuthRequestResponse;
+
+        let userData = { user, email, fullName };
+
+        // Check if name/email are provided (first login)
+        if (fullName?.givenName || fullName?.familyName) {
+          // Store them locally for later
+          await AsyncStorage.setItem('apple_user_data', JSON.stringify(userData));
+        } else {
+          // If not provided (subsequent login), load from storage
+          const storedData = await AsyncStorage.getItem('apple_user_data');
+          if (storedData) {
+            userData = JSON.parse(storedData);
+          }
+        }
+
+        let message = await appleSignIn( appleAuthRequestResponse, userData);
 
       } else if (credentialState === appleAuth.State.NOT_FOUND) {
         console.log("User Not found.");
@@ -116,15 +131,10 @@ const LoginScreenComponent = ( {route} ) => {
     // android, no apple button.
     return (
       <View style={styles.loginContainer}>
+
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>{translate('greeting')}</Text>
         <Image source={require('.././assets/sacred-records-logo-200x200.png')} style={styles.loginScreenImage} />
-        <TouchableOpacity style={styles.googleButton} onPress={() => signInToGoogle() }>
-          <Image
-            source={{ uri: 'https://storage.googleapis.com/sacred-records/google-sign-in.png'}} // Replace with your Google logo image path
-            style={styles.logo}
-          />
-          <Text style={styles.googleButtonText}>{translate('google_login')}</Text>
-        </TouchableOpacity>
+        <CognitoLoginScreenComponent />
       </View>
     );
   }
@@ -225,7 +235,24 @@ const styles = StyleSheet.create({
   },
   warningText: {
     paddingTop: 10,
-  }
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    width: '90%',
+  },
+  passwordInput: {
+    flex: 1,
+    height: 50,
+    fontSize: 16,
+  },
+
 });
 
 export default LoginScreenComponent;

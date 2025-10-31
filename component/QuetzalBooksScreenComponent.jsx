@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState,  useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity, Alert, ScrollView } from 'react-native';
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
@@ -10,10 +10,30 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useI18n } from '.././context/I18nContext'; 
 import { StripeProvider, useStripe } from '@stripe/stripe-react-native';
 const tribalImages = require('./../assets/quetzal-image-with-others-400x126.jpg');
+//import { useIAP } from 'react-native-iap';
+/*
+import { RNIap, PurchaseError, requestSubscription, useIAP, validateReceiptIos } from 'react-native-iap';
 
-
+const subscriptionsSkus = Platform.select({
+  ios: ['sacred-records-monthly-subscription']
+});
+*/
 
 const QuetzalBookScreenComponent = ( ) => {
+
+  /*
+  const appleSharedSecred = process.env.APPLE_SHARED_SECRET;
+  const {
+    connected,
+    subscriptions,
+    getSubscriptions,
+    getActiveSubscriptions,
+    currentPurchase,
+    finishTransaction,
+    purchaseHistory,
+    getPurchaseHistory
+  } = useIAP();
+  */
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const  stripeCallback = Environment.STRIPE_CALLBACK;
@@ -34,67 +54,97 @@ const QuetzalBookScreenComponent = ( ) => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
 
+  const subscribeIos = async() => {
+    console.log("Subscribe IOS");
+    /*
+      try {
+        const connection = await RNIap.initConnection();
+        console.log("connection in QuetzalBookScreenComponent");
+        console.log(connection);
+        const subscriptionSkus = ['records_monthly_subscription'];
+
+        //const subscriptions = await RNIap.getSubscriptions(subscriptionSkus);
+        const subscriptions = await RNIap.getAvailableSubscriptions();
+        console.log("subscriptions");
+        console.log(subscriptions);
+        //const products = await fetchProducts({ skus: itemSkus });
+        //console.log('Products and subscriptions:', products);
+      } catch (error) {
+        console.error('Failed to fetch items', error);
+      }
+      */
+  }
 
   const subscribe = async() => {
-    const subscriptionResults = await checkIfSubscribed();
-    if(subscriptionResults.isSubscribed) {
-      Alert.alert("You are already subscribed");
-      setShowBanner(false);
-      //await fetchData();
+    console.log("subscribe");
+    if(isIOS) {
+      console.log("IOS subscribe request");
+      subscribeIos();
     } else {
-      //console.log("you are not subscribed.  We shall proceed.");
-      // do credit card processing here.
-
-
-      const setupIntentResponse = await createSetupIntent();
-      //console.log(setupIntentResponse);
-      let message = setupIntentResponse.message;
-      let customerId  = setupIntentResponse.customerId;
-      let setupIntentClientSecret = setupIntentResponse.setupIntentClientSecret;
-      //console.log("setupIntentClientSecret " + setupIntentClientSecret);
-      const initialized = await initializePaymentSheet(setupIntentClientSecret, customerId);
-      //console.log("initialized: " + initialized);
-      const { error } = await presentPaymentSheet();
-
-      if (error) {
-        console.log("we encountered an error");
-        console.log(error);
-        if (error.code === PaymentSheetError.Canceled) {
-           Alert.alert(`Error code: ${error.code}`, error.message);
-          // Customer canceled - you should probably do nothing.
-        } else {
-           Alert.alert(`Error code: ${error.code}`, error.message);
-          // PaymentSheet encountered an unrecoverable error. You can display the error to the user, log it, etc.
-        }
+      const subscriptionResults = await checkIfSubscribed();
+      if(subscriptionResults.isSubscribed) {
+        Alert.alert("You are already subscribed");
+        setShowBanner(false);
+        //await fetchData();
       } else {
+        //console.log("you are not subscribed.  We shall proceed.");
+        // do credit card processing here.
 
-        try {
 
-          const clientSecretObj = await createQzSubscriptionIntent(setupIntentResponse);
-          console.log("clientSecretObj from createQzSubscriptionIntent");
-          console.log(clientSecretObj);
+        const setupIntentResponse = await createSetupIntent();
+        //console.log(setupIntentResponse);
+        let message = setupIntentResponse.message;
+        let customerId  = setupIntentResponse.customerId;
+        let setupIntentClientSecret = setupIntentResponse.setupIntentClientSecret;
+        //console.log("setupIntentClientSecret " + setupIntentClientSecret);
+        const initialized = await initializePaymentSheet(setupIntentClientSecret, customerId);
+        //console.log("initialized: " + initialized);
+        const { error } = await presentPaymentSheet();
 
-          if(clientSecretObj === undefined) {
-            console.log("There was an error processing your payment.  Please try again later.")
-            Alert.alert("There was an error processing your payment.  Please try again later.");
-            return;
-          }
-
-          // when done with CC processing make call to finish purchase.
-          // we are subscribed now.
-          await finalizePurchase(clientSecretObj.subscriptionId);
-          await determineIfBannerNeeded();
-          await fetchData();
-          setLoading(false);
+        if (error) {
+          console.log("we encountered an error");
+          //console.log(error);
           
-        } catch(err) {
-          console.log("Error getting in the process as a whole.");
-          console.log(err); 
-          return(err);
+          if (error.code === "Canceled") {
+            // Customer canceled - you should probably do nothing.
+          } else {
+            Alert.alert(`Error code: ${error.code}`, error.message);
+            // PaymentSheet encountered an unrecoverable error. You can display the error to the user, log it, etc.
+          }
+          
+        } else {
+
+          try {
+
+            const clientSecretObj = await createQzSubscriptionIntent(setupIntentResponse);
+            console.log("clientSecretObj from createQzSubscriptionIntent");
+            console.log(clientSecretObj);
+
+            if(clientSecretObj === undefined) {
+              console.log("There was an error processing your payment.  Please try again later.")
+              Alert.alert("There was an error processing your payment.  Please try again later.");
+              return;
+            }
+            //console.log(clientSecretObj)
+            // when done with CC processing make call to finish purchase.
+            // we are subscribed now.
+            if(clientSecretObj?.subscriptionId.length>1) {
+              await finalizePurchase(clientSecretObj.subscriptionId);
+              await determineIfBannerNeeded();
+              await fetchData();
+              setLoading(false);
+            } else {
+              return message += " No subscription was created. Contact Support.";
+            }
+          } catch(err) {
+            console.log("Error getting in the process as a whole.");
+            console.log(err); 
+            return(err);
+          }
         }
+        //console.log("finalResult from openPaymentSheet");
+        //console.log(finalResult);
       }
-      //console.log("finalResult from openPaymentSheet");
-      console.log(finalResult);
     }
   }
 
@@ -459,14 +509,14 @@ const QuetzalBookScreenComponent = ( ) => {
               <Text style={styles.subtitle}>{translate('banner_text_1')}</Text>
               <StripeProvider
                 publishableKey={stripeKey} // Replace with your actual publishable key
-                urlScheme="xyz.sacredrecords" // Optional: required for 3D Secure and other payment methods
+                urlScheme="com.sacredrecords" // Optional: required for 3D Secure and other payment methods
                 merchantIdentifier="merchant.io.trisummit" // Optional: required for Apple Pay
               >
-                <TouchableOpacity style={styles.button} onPress={() => subscribe() }>
+                <TouchableOpacity style={styles.subscribeButton} onPress={() => subscribe() }>
                     <Text style={styles.buttonText}>{translate('banner_button_text')}</Text>
                 </TouchableOpacity>
               </StripeProvider>
-              <Text style={styles.secondSide}>
+              <Text style={styles.subtitle}>
                   {translate('banner_text_2')}
               </Text>
               <Text style={styles.price}>{translate('banner_text_3')}</Text>
@@ -563,7 +613,7 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     padding: 5,
-    marginHorizontal: 16,
+    marginHorizontal: 0,
     borderRadius: 15,
     marginTop: 5,
     marginBottom: 10,
@@ -580,8 +630,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   topImageContainerWithBanner: {
-    flex: 1,
-    marginBottom: 90,
+  
+    marginBottom: 0,
   },
   topImage: {
     width: '270', // Take up the full width of the item container
@@ -595,7 +645,7 @@ const styles = StyleSheet.create({
   releaseTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#ff0000',
+    color: '#ffdb58',
     marginBottom: 5,
 
   },
@@ -606,7 +656,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#e0e0e0',
     marginBottom: 10,
   },
@@ -618,6 +668,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginRight: 10,
 
+  },
+  subscribeButton: {
+    backgroundColor: '#ffdb58', // A contrasting color
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+    marginRight: 10,
+    marginBottom: 10,
   },
   buttonText: {
     color: '#333',
@@ -631,7 +690,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   price: {
-    fontSize: 16,
+    fontSize: 12,
     color: '#ffdb58',
     marginBottom: 10,
   },

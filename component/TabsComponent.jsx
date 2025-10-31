@@ -63,22 +63,7 @@ const TabsComponent = ( ) => {
                         )
                     }}
                 />
-                <Tab.Screen name="Shopping" component={StoreStackNavigatorComponent} 
-                    options = {{
-                        headerShown: false,
-                        headerTitleAlign: 'center',
-                        tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
-                        tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
-                        tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
-                        tabBarShowLabel: true,
-                        title: translate('store'), // The key should correspond to your translation file
-                        tabBarIcon: ({focused}) => (
-                            <View>
-                                <ShoppingCart  stroke="black" fill="#fff" width={22} height={22}/>
-                            </View>
-                        )
-                    }}
-                />
+                
                 <Tab.Screen name="Bookmark" component={BookmarkScreenComponent} 
                     options = {{
                         headerShown: true,
@@ -162,5 +147,24 @@ export default TabsComponent;
                         tabBarButton: () => null,
                     }}
                 />
+
+                <Tab.Screen name="Shopping" component={StoreStackNavigatorComponent} 
+                    options = {{
+                        headerShown: false,
+                        headerTitleAlign: 'center',
+                        tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
+                        tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
+                        tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
+                        tabBarShowLabel: true,
+                        title: translate('store'), // The key should correspond to your translation file
+                        tabBarIcon: ({focused}) => (
+                            <View>
+                                <ShoppingCart  stroke="black" fill="#fff" width={22} height={22}/>
+                            </View>
+                        )
+                    }}
+                />
+                
+
 
 */

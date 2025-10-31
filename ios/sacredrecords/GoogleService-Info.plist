@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>422742245899-4grni2k167tulc7l6k6aotfkce8b294j.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.422742245899-4grni2k167tulc7l6k6aotfkce8b294j</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>422742245899-futlmkam3v8ctvc7a2o3110of002usdr.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDQauv6VS8hU3mdaZdo1nVTSu9no_Bhpgo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>422742245899</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.sacredrecords</string>
+	<key>PROJECT_ID</key>
+	<string>sacred-records</string>
+	<key>STORAGE_BUCKET</key>
+	<string>sacred-records.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:422742245899:ios:9bb826aed2d90e0f02fd0e</string>
+</dict>
+</plist>
