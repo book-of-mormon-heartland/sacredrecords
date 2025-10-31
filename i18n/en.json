@@ -57,7 +57,7 @@
   "delete_account_button_text": "Delete My Account",
   "delete_account_button": "Delete My Account",
   "version": "Application Version",
-  "build": "16.0 / 14",
+  "build": "17.0 / 14",
   "profile_settings_text":"Allows update of given name, family name, and email address.",
   "delete_profile_title":"Delete Personal Information",
   "delete_profile_button": "Proceed to Delete Personal Information",
