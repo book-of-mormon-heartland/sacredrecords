@@ -75,5 +75,7 @@
   "reset_password": "Restablecer contraseña",
   "make_account_active": "Para activar tu cuenta, ingresa el nombre de usuario y el número de 6 dígitos que recibiste en un correo electrónico.",
   "email" : "Correo",
-  "send_code": "Enviar código"
+  "send_code": "Enviar código",
+  "apple_subscription_text": "Suscríbete aquí mediante una compra dentro de la app de Apple para acceder a los registros ancestrales y las enseñanzas de los pueblos indígenas de América. El 75 % de los ingresos se destina al Primer Círculo de Discípulos del Jefe, dedicado a la enseñanza y el desarrollo de los pueblos indígenas de todo el continente americano. El costo es de $9.99 al mes. Puedes cancelar la suscripción cuando quieras.",
+  "apple_subscription_button": "Compra una suscripción"
 }

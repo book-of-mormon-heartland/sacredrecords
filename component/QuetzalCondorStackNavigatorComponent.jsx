@@ -6,6 +6,8 @@ import QzBookScreenComponent from './QzBookScreenComponent';
 import QzChaptersScreenComponent from './QzChaptersScreenComponent';
 import QzChapterContentScreenComponent from './QzChapterContentScreenComponent';
 import { useI18n } from '.././context/I18nContext'; 
+import AppleSubscriptionScreenComponent from './AppleSubscriptionScreenComponent';
+
 
 const BooksStack = createNativeStackNavigator();
 
@@ -24,6 +26,10 @@ const QuetzalCondorStackNavigatorComponent = () => {
       <BooksStack.Screen name="QzChapterContent" options = {{
         title: translate('chapter')
       }} component={QzChapterContentScreenComponent} />
+      <BooksStack.Screen name="AppleSubscription" options = {{
+          title: translate('apple_subscription_button'),
+          headerTitleAlign: 'center',
+        }}   component={AppleSubscriptionScreenComponent} />
     </BooksStack.Navigator>
   );
 };

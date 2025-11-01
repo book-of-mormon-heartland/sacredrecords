@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput,  TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Linking, TouchableOpacity, ScrollView } from 'react-native';
 import Spacer from './Spacer';
 import { AuthContext } from '.././context/AuthContext';
 import { useI18n } from '.././context/I18nContext'; 
@@ -60,8 +60,16 @@ const CancelSubscriptionScreenComponent = ( {navigation} ) => {
   );
 
 
-  const cancelSubscription = async() => {
-    //console.log("cancel subscription");
+  const cancelAppleSubscription = async() => {
+    try {
+      await Linking.openURL('https://apps.apple.com/account/subscriptions');
+    } catch (err) {
+      Alert.alert('Error', 'Unable to open subscriptions page.');
+    }
+  }
+
+  const cancelAndroidSubscription = async() => {
+        //console.log("cancel subscription");
     // check all three values to see if there is content.
     let names={
       subscription: "quetzal-condor"
@@ -84,6 +92,17 @@ const CancelSubscriptionScreenComponent = ( {navigation} ) => {
     } catch (error) {
       console.log("Error");
       console.log(error);
+    }
+  }
+
+
+
+  const cancelSubscription = async() => {
+
+    if(isIOS) {
+      cancelAppleSubscription();
+    } else {
+      cancelAndroidSubscription();
     }
   }
 

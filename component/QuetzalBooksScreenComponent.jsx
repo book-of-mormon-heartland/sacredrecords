@@ -10,32 +10,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useI18n } from '.././context/I18nContext'; 
 import { StripeProvider, useStripe } from '@stripe/stripe-react-native';
 const tribalImages = require('./../assets/quetzal-image-with-others-400x126.jpg');
-//import { useIAP } from 'react-native-iap';
-/*
-import { RNIap, PurchaseError, requestSubscription, useIAP, validateReceiptIos } from 'react-native-iap';
 
-const subscriptionsSkus = Platform.select({
-  ios: ['sacred-records-monthly-subscription']
-});
-*/
 
-const QuetzalBookScreenComponent = ( ) => {
+const QuetzalBookScreenComponent = ( {route} ) => {
 
-  /*
-  const appleSharedSecred = process.env.APPLE_SHARED_SECRET;
-  const {
-    connected,
-    subscriptions,
-    getSubscriptions,
-    getActiveSubscriptions,
-    currentPurchase,
-    finishTransaction,
-    purchaseHistory,
-    getPurchaseHistory
-  } = useIAP();
-  */
-
-  const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
+    const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const  stripeCallback = Environment.STRIPE_CALLBACK;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
   const { refreshJwtToken, setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
@@ -56,23 +35,8 @@ const QuetzalBookScreenComponent = ( ) => {
 
   const subscribeIos = async() => {
     console.log("Subscribe IOS");
-    /*
-      try {
-        const connection = await RNIap.initConnection();
-        console.log("connection in QuetzalBookScreenComponent");
-        console.log(connection);
-        const subscriptionSkus = ['records_monthly_subscription'];
+    navigation.navigate('AppleSubscription');
 
-        //const subscriptions = await RNIap.getSubscriptions(subscriptionSkus);
-        const subscriptions = await RNIap.getAvailableSubscriptions();
-        console.log("subscriptions");
-        console.log(subscriptions);
-        //const products = await fetchProducts({ skus: itemSkus });
-        //console.log('Products and subscriptions:', products);
-      } catch (error) {
-        console.error('Failed to fetch items', error);
-      }
-      */
   }
 
   const subscribe = async() => {
@@ -605,11 +569,13 @@ const styles = StyleSheet.create({
   text: {
     marginTop: 5,
     textAlign: 'center',
+    fontSize: 12
   },
   redText: {
     color: '#cc0000',
     marginTop: 5,
     textAlign: 'center',
+    fontSize: 12
   },
   bannerContainer: {
     padding: 5,

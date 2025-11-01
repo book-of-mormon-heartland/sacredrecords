@@ -35,8 +35,8 @@ function getEnvironment() {
     //console.log(process.env.APPLE_SHARED_SECRET);
     console.log("platform");
     console.log(platform);
-    platform="development";
-    console.log(platform);
+    //platform="production";
+    //console.log(platform);
     // ...now return the correct environment
     return _Environments[platform]
 }

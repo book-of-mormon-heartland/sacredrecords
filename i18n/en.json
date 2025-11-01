@@ -76,7 +76,9 @@
   "forgot_password": "Forgot Password",
   "reset_password": "Reset Password",
   "email" : "Email",
-  "send_code": "Send Code"
+  "send_code": "Send Code",
+  "apple_subscription_text": "Subscribe here as an Apple in app purchase to access the ancient records and lodge teachings of the indigenous people of the Americas. 75% of the proceeds go to the First Circle of Chief's Disciples which is dedicated to the teaching and rising of the indigenous people on all of the Americas. The cost is $9.99 per month.  Unsubscribe anytime.",
+  "apple_subscription_button": "Purchase Subscription"
 
 }
 
