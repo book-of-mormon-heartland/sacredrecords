@@ -123,7 +123,6 @@ const LoginScreenComponent = ( {route} ) => {
           onPress={onAppleButtonPress}
         />
         <Text style={styles.warningText}>{translate('always_use_same_sign_in')}</Text>
-
       </View>
     );
 
@@ -135,6 +134,7 @@ const LoginScreenComponent = ( {route} ) => {
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>{translate('greeting')}</Text>
         <Image source={require('.././assets/sacred-records-logo-200x200.png')} style={styles.loginScreenImage} />
         <CognitoLoginScreenComponent />
+        <Text style={styles.bottomText}>{translate("login_issue")}</Text>
       </View>
     );
   }
@@ -252,6 +252,12 @@ const styles = StyleSheet.create({
     height: 50,
     fontSize: 16,
   },
+  bottomText: {
+    marginTop: 5,
+    textAlign: 'center',
+    fontSize: 12
+  },
+
 
 });
 

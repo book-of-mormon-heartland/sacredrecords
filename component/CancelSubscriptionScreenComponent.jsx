@@ -61,6 +61,31 @@ const CancelSubscriptionScreenComponent = ( {navigation} ) => {
 
 
   const cancelAppleSubscription = async() => {
+    
+    let names={
+      subscription: "quetzal-condor"
+    };
+    try {
+      const response = await fetch(serverUrl + '/payments/cancelAppleSubscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwtToken}`
+          },
+          body: JSON.stringify(names),
+      });
+      if (!response.ok) {
+        console.log("response was not okay");
+      } else {
+        const json = await response.json();
+        setValidationError(json.message);
+      }
+    } catch (error) {
+      console.log("Error");
+      console.log(error);
+    }
+
+
     try {
       await Linking.openURL('https://apps.apple.com/account/subscriptions');
     } catch (err) {

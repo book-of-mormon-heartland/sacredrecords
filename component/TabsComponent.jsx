@@ -7,12 +7,12 @@ import BookmarkScreenComponent from './BookmarkScreenComponent'; // Adjust path 
 //import SettingsScreenComponent from './SettingsScreenComponent'; // Adjust path as needed
 import HomeStackNavigatorComponent from './HomeStackNavigatorComponent'; // Adjust path as needed
 import SettingsStackNavigatorComponent from './SettingsStackNavigatorComponent'; // Adjust path as needed
-import HomeScreenComponent from './HomeScreenComponent'; // Adjust path as needed
+import DonateScreenComponent from './DonateScreenComponent'; // Adjust path as needed
 import BookStackNavigatorComponent from './BookStackNavigatorComponent';
 import QuetzalCondorStackNavigatorComponent from './QuetzalCondorStackNavigatorComponent';
 import StoreStackNavigatorComponent from './StoreStackNavigatorComponent';
 //import StoreScreenComponent from './StoreScreenComponent'; // Adjust path as needed
-import { BookOpen, Home, Bookmark, Settings, Search, ShoppingCart, PlusCircle } from "react-native-feather";
+import { BookOpen, Home, Bookmark, Settings, Package, ShoppingCart, PlusCircle } from "react-native-feather";
 import { useI18n } from '.././context/I18nContext'; 
 
 const Tab = createBottomTabNavigator();
@@ -81,6 +81,23 @@ const TabsComponent = ( ) => {
                     }}
                 />
                 
+                <Tab.Screen name="Donations" component={DonateScreenComponent} 
+                    options = {{
+                        headerShown: true,
+                        headerTitleAlign: 'center',
+                        tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
+                        tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
+                        tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
+                        tabBarShowLabel: true,
+                        title: translate('donate_title'), // The key should correspond to your translation file
+                        tabBarIcon: ({focused}) => (
+                            <View>
+                                <Package  stroke="black" fill="#fff" width={22} height={22}/>
+                            </View>
+                        )
+                    }}
+                />
+
 
                 <Tab.Screen name="Settings" component={SettingsStackNavigatorComponent} 
                     options = {{

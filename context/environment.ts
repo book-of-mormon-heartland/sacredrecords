@@ -32,10 +32,9 @@ var _Environments = {
 function getEnvironment() {
     // This value is defined in the .env file.  
     var platform = process.env.ENVIRONMENT;
-    //console.log(process.env.APPLE_SHARED_SECRET);
     console.log("platform");
     console.log(platform);
-    //platform="production";
+    platform="production";
     //console.log(platform);
     // ...now return the correct environment
     return _Environments[platform]
