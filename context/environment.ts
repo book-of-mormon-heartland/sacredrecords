@@ -34,7 +34,7 @@ function getEnvironment() {
     var platform = process.env.ENVIRONMENT;
     console.log("platform");
     console.log(platform);
-    platform="production";
+    platform="development";
     //console.log(platform);
     // ...now return the correct environment
     return _Environments[platform]

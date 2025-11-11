@@ -16,7 +16,8 @@ const EditProfileScreenComponent = ( {navigation} ) => {
   const [givenName, setGivenName] = useState('');
   const [familyName, setFamilyName] = useState('');
   const [billingName, setBillingName] = useState('');
-  const {  jwtToken  } = useContext(AuthContext);
+  const { jwtToken,  setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  
   const isIOS = ( Platform.OS === 'ios' );
   let serverUrl = Environment.NODE_SERVER_URL;
   if(isIOS) {

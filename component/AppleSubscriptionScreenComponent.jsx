@@ -81,6 +81,7 @@ const AppleSubscriptionScreenComponent = ({route}) => {
               if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
                 setJwtToken(tokenRefreshObj.jwtToken);
                 saveJwtToken(tokenRefreshObj.jwtToken);
+                setLoading("false");
                 //await createQzSubscriptionIntent();
               } else {
                 // its been a week.  Login from this location.

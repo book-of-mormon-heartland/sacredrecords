@@ -1,8 +1,9 @@
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useState, useContext } from 'react';
 import { View, TextInput, Button, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { AuthContext } from '.././context/AuthContext';
 import { useNavigation, navigate } from '@react-navigation/native';
-import AccountVerificationScreenComponent from './AccountVerificationScreenComponent.jsx';
+//import AccountVerificationScreenComponent from './AccountVerificationScreenComponent.jsx';
 import { Eye, EyeOff } from "react-native-feather";
 
 
@@ -19,6 +20,24 @@ const CognitoLoginScreenComponent = ( {route} ) => {
     const [message, setMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     
+
+
+
+    useFocusEffect(
+      React.useCallback(() => {
+        fetchData();
+        return () => {
+        };
+      }, [])
+    );
+
+    const fetchData = async() => {
+      // check to see if with have an auth token in asynch storage.  If the token checks out, log them in.
+
+
+
+    } 
+
 
     const handleLogin = async () => {
         try {

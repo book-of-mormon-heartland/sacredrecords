@@ -11,10 +11,12 @@ var Environment = require('.././context/environment.ts');
 const DonateScreenComponent = ( {navigation} ) => {
 
   const { language, setLanguage, translate } = useI18n();
+  
   // Use state to manage the input values
   const [validationError, setValidationError] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(true);
-  const {  jwtToken  } = useContext(AuthContext);
+  const { jwtToken,  setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  
   const isIOS = ( Platform.OS === 'ios' );
   let serverUrl = Environment.NODE_SERVER_URL;
   if(isIOS) {

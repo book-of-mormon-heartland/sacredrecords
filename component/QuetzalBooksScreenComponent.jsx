@@ -375,11 +375,17 @@ const QuetzalBookScreenComponent = ( {route} ) => {
         }
       });
       if (!response.ok) {
+        console.log("not okay");
         if(response.status === 500) {
+          console.log("500");
           const tokenRefreshObj = await refreshJwtToken();
+          console.log("tokenRefreshObject");
+          console.log(tokenRefreshObj);
           if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
+            console.log("Token refresh valid token");
             setJwtToken(tokenRefreshObj.jwtToken);
             await saveJwtToken(tokenRefreshObj.jwtToken);
+            fetchData()
           } else {
             // its been a week.  Login from this location.
             setJwtToken();

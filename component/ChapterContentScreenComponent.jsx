@@ -59,6 +59,7 @@ const ChapterContentScreenComponent = ( {route}) => {
           if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
             setJwtToken(tokenRefreshObj.jwtToken);
             saveJwtToken(tokenRefreshObj.jwtToken);
+            fetchData();
           } else {
             setJwtToken();
             deleteJwtToken();

@@ -56,7 +56,7 @@
   "delete_account_button_text": "Eliminar mi cuenta",
   "delete_account_button": "Eliminar mi cuenta",
   "version": "Versión de la aplicación",
-  "build": "17.0 / 14",
+  "build": "19.0 / 17",
   "profile_settings_text":"Permite actualizar el nombre, apellido y dirección de correo electrónico.",
   "delete_profile_title":"Eliminar información personal",
   "delete_profile_button": "Proceder a eliminar información personal",
@@ -78,6 +78,11 @@
   "send_code": "Enviar código",
   "apple_subscription_text": "Suscríbete aquí mediante una compra dentro de la app de Apple para acceder a los registros ancestrales y las enseñanzas de los pueblos indígenas de América. El 75 % de los ingresos se destina al Primer Círculo de Discípulos del Jefe, dedicado a la enseñanza y el desarrollo de los pueblos indígenas de todo el continente americano. El costo es de $9.99 al mes. Puedes cancelar la suscripción cuando quieras.",
   "apple_subscription_button": "Compra una suscripción",
-  "login_issue": "¿Problemas para iniciar sesión? Contacta con support@trisummit.io."
+  "login_issue": "¿Problemas para iniciar sesión? Contacta con support@trisummit.io.",
+  "donate_title": "Donaciones",
+  "donate_text": "Book of Mormon Heartland es una organización sin fines de lucro 501(c)3 dedicada a apoyar el movimiento de unidad de los pueblos indígenas de Norteamérica y Sudamérica. Los gastos del movimiento son demasiado elevados para que una sola persona los cubra. Por favor, colabore con el movimiento haciendo una donación aquí.",
+  "donate_button": "Dona ahora",
+  "supporting": "Secundario",
+  "book_of_mormon_heartland": "Corazón del Libro de Mormón"
 
 }

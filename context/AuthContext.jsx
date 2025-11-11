@@ -37,33 +37,61 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
-    const retrieveJwtToken = async() => {
+    const saveRefreshToken = async(token) => {
         try {
-            const credentials = await Keychain.getGenericPassword();
-            if (credentials) {
-                //console.log('JWT token retrieved successfully:', credentials.password);
-                
-                return credentials.password; // This is your JWT token
-            } else {
-            //console.log('No JWT token found.');
-            return null;
-            }
+            // You can use a static string like 'jwtToken' for the username
+            // or a user-specific identifier if needed.
+            await Keychain.setGenericPassword('refreshToken', token);
+            //console.log('JWT token saved successfully!');
         } catch (error) {
-            console.error('Error retrieving JWT token:', error);
-            return null;
+            console.error('Error saving JWT token:', error);
         }
     }
 
+
+    const retrieveJwtToken = async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword({ service: 'jwtToken' });
+            return credentials ? credentials.password : null;
+        } catch (error) {
+            console.error('Error loading access token:', error);
+            return null;
+        }
+    };
+
+    // Load refresh token
+    const retrieveRefreshToken = async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword({ service: 'refreshToken' });
+            return credentials ? credentials.password : null;
+        } catch (error) {
+            console.error('Error loading refresh token:', error);
+            return null;
+        }
+    };
+
+
+
     const deleteJwtToken = async() => {
         try {
-            await Keychain.resetGenericPassword();
-            //console.log('JWT token deleted successfully!');
+            await Keychain.resetGenericPassword({ service: 'jwtToken' }); // clears refresh token
         } catch (error) {
             console.error('Error deleting JWT token:', error);
         }
     }
 
+    const deleteRefreshToken = async() => {
+        try {
+            await Keychain.resetGenericPassword({ service: 'refreshToken' }); // clears refresh token
+        } catch (error) {
+            console.error('Error deleting JWT token:', error);
+        }
+    }
+
+
+
     const refreshJwtToken = async () => {
+        console.log("in refreshJwtToken");
         try {
             const postResponse = await fetch(serverUrl + "/authentication/refreshJwtToken", {
                 method: 'POST',
@@ -74,13 +102,13 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ 
                     jwtToken: jwtToken, 
                     refreshToken: refreshToken,
-                    userId: userProfile.id
                 }),
             });
             if (!postResponse.ok) {
                 console.log("It was an error");
                 throw new Error(`HTTP error! status: ${postResponse.status}`);
             }
+            //console.log("refreshJwtToken returned");
             const responseData = await postResponse.json();
             const obj = JSON.parse(responseData);
             //console.log(obj);
@@ -145,6 +173,7 @@ export const AuthProvider = ({ children }) => {
                         setUserProfile(user);
                         //setUserToken(idToken);
                         saveJwtToken(obj.jwtToken);
+                        saveRefreshToken(obj.refreshToken);
                         setTemporaryJwtToken("");
                         setTemporaryRefreshToken("");
                         return "true";
@@ -162,6 +191,7 @@ export const AuthProvider = ({ children }) => {
                 setGoogleMessage( "Not Successful");
                 setUserProfile(undefined);
                 deleteJwtToken();
+                deleteRefreshToken();
                 setJwtToken("");
                 setRefreshToken("");
                 setTemporaryJwtToken("");
@@ -177,6 +207,7 @@ export const AuthProvider = ({ children }) => {
                 setJwtToken("");
                 setRefreshToken("");
                 deleteJwtToken();
+                deleteRefreshToken();
                 setTemporaryJwtToken("");
                 setTemporaryRefreshToken("");
             } else if (error.code === statusCodes.IN_PROGRESS) {
@@ -185,6 +216,7 @@ export const AuthProvider = ({ children }) => {
                 setJwtToken("");
                 setRefreshToken("");
                 deleteJwtToken();
+                deleteRefreshToken();
                 setTemporaryJwtToken("");
                 setTemporaryRefreshToken("");
             } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
@@ -193,6 +225,7 @@ export const AuthProvider = ({ children }) => {
                 setJwtToken("");
                 setRefreshToken("");
                 deleteJwtToken();
+                deleteRefreshToken();
                 setTemporaryJwtToken("");
                 setTemporaryRefreshToken("");
             } else {
@@ -201,6 +234,7 @@ export const AuthProvider = ({ children }) => {
                 setJwtToken("");
                 setRefreshToken("");
                 deleteJwtToken();
+                deleteRefreshToken();
                 setTemporaryJwtToken("");
                 setTemporaryRefreshToken("");
             }
@@ -220,6 +254,7 @@ export const AuthProvider = ({ children }) => {
             setJwtToken("");
             setRefreshToken("");
             deleteJwtToken();
+            deleteRefreshToken();
             setTemporaryJwtToken("");
             setTemporaryRefreshToken("");
 
@@ -286,6 +321,7 @@ export const AuthProvider = ({ children }) => {
                 setJwtToken(responseData.jwtToken || "");
                 setRefreshToken(responseData.refreshToken || "");
                 saveJwtToken(responseData.jwtToken);
+                saveRefreshToken(responseData.refreshToken);
             } else {
                 setTemporaryJwtToken(responseData.jwtToken || "");
                 setTemporaryRefreshToken(responseData.refreshToken || "");
@@ -298,6 +334,7 @@ export const AuthProvider = ({ children }) => {
             setJwtToken("");
             setRefreshToken("");
             deleteJwtToken();
+            deleteRefreshToken();
             setTemporaryJwtToken("");
             setTemporaryRefreshToken("");
             return false;
@@ -367,6 +404,7 @@ export const AuthProvider = ({ children }) => {
                 setGoogleMessage("Logged In Successfully");
                 setUserProfile(user);
                 saveJwtToken(obj.jwtToken);
+                saveRefreshToken(obj.refreshToken);
                 setTemporaryJwtToken("");
                 setTemporaryRefreshToken("");
                 return "true";
@@ -376,7 +414,8 @@ export const AuthProvider = ({ children }) => {
                 setRefreshToken("");
                 setGoogleMessage("Not Logged In");
                 setUserProfile();
-                saveJwtToken("");
+                deleteJwtToken();
+                deleteRefreshToken();
                 setTemporaryJwtToken("");
                 setTemporaryRefreshToken("");
                 return "false";
@@ -417,11 +456,11 @@ export const AuthProvider = ({ children }) => {
     }
 
     const cognitoVerifyAccount = async (username, verificationCode) => {
-      console.log("cognitoVerifyAccount called");
-      console.log('username');
-      console.log(username);
-      console.log('verificationCode');
-      console.log(verificationCode);
+      //console.log("cognitoVerifyAccount called");
+      //console.log('username');
+      //console.log(username);
+      //console.log('verificationCode');
+      //console.log(verificationCode);
 
       // send it to the sserver to create the account.
       try {
@@ -434,11 +473,11 @@ export const AuthProvider = ({ children }) => {
           });
           if (!postResponse.ok) {
 
-              console.log("Response not ok");
+              console.log("Response not ok");cs
               //throw new Error(`HTTP error! status: ${postResponse.status}`);
           }
           const responseData = await postResponse.json();
-           console.log(responseData);
+          //console.log(responseData);
           return responseData;
     
         } catch (error) { 

@@ -69,6 +69,7 @@ const ChapterScreenComponent = ( {route} ) => {
           if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
             setJwtToken(tokenRefreshObj.jwtToken);
             await saveJwtToken(tokenRefreshObj.jwtToken);
+            fetchData();
           } else {
             // its been a week.  Login from this location.
             setJwtToken();

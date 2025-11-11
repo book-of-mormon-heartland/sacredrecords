@@ -14,6 +14,8 @@ import StoreStackNavigatorComponent from './StoreStackNavigatorComponent';
 //import StoreScreenComponent from './StoreScreenComponent'; // Adjust path as needed
 import { BookOpen, Home, Bookmark, Settings, Package, ShoppingCart, PlusCircle } from "react-native-feather";
 import { useI18n } from '.././context/I18nContext'; 
+import { Platform } from 'react-native';
+
 
 const Tab = createBottomTabNavigator();
 
@@ -22,8 +24,8 @@ const TabsComponent = ( ) => {
     const { theme, setTheme } = useContext(ThemeContext);
     const { jwtToken } = useContext(AuthContext);
     const { language, setLanguage, translate } = useI18n();
-    
-    
+    const isIOS = ( Platform.OS === 'ios' );
+
 /*
 <Tab.Screen name="Library-Main" component={BookStackNavigatorComponent} 
 */
