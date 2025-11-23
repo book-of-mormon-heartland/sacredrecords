@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useContext, useState } from 'react';
-import { View, Text, StyleSheet, Switch, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Switch, Linking, ScrollView, TouchableOpacity, Alert } from 'react-native';
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
@@ -14,9 +14,11 @@ const SettingsScreenComponent = ( {navigation} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const { googleSignOut,  refreshJwtToken, setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const { signOut,  refreshJwtToken, setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  //const [signedIn, setSignedIn] = useState(jwtToken ? true : false);
+  const [userSignedIn, setUserSignedIn] = useState(false);
   
   const isIOS = ( Platform.OS === 'ios' );
   const { language, setLanguage, translate } = useI18n();
@@ -39,6 +41,23 @@ const SettingsScreenComponent = ( {navigation} ) => {
     navigation.navigate('DeleteAccount', {});    
   }
 
+  const viewTermsOfUse = async() => {
+    try {
+      await Linking.openURL('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/');
+    } catch (err) {
+      Alert.alert('Error', 'Unable to open terms of use page.');
+    }
+  }
+
+  const viewPrivacyPolicy = async() => {
+    try {
+      await Linking.openURL('https://sacred-records-node-prod-376185747738.us-central1.run.app/privacy');
+    } catch (err) {
+      Alert.alert('Error', 'Unable to open privacy policy page.');
+    }
+  }
+
+
   const cancelSubscription = () => {
     console.log("Cancel Subscription");
     navigation.navigate('CancelSubscription', {});    
@@ -48,10 +67,17 @@ const SettingsScreenComponent = ( {navigation} ) => {
   useFocusEffect(
     React.useCallback(() => {
       const loadData = async () => {
-        const isSubscribedResult = await checkIfSubscribed();
-        //console.log(isSubscribedResult);
-        // the effect is the opposite of what I am use to.
-        setIsSubscribed(!isSubscribedResult);
+        const myJwtToken = await retrieveJwtToken();
+
+        if(myJwtToken) {
+          setUserSignedIn(true)
+          const isSubscribedResult = await checkIfSubscribed();
+          //console.log(isSubscribedResult);
+          // the effect is the opposite of what I am use to.
+          setIsSubscribed(!isSubscribedResult);
+        } else {
+          setUserSignedIn(false);
+        }
       };
       loadData();
 
@@ -148,6 +174,20 @@ const SettingsScreenComponent = ( {navigation} ) => {
     saveLanguage(selectedLanguage);
   }
 
+  const signOutOfApp = async() => {
+    console.log("attempting signout");
+    await signOut();
+    setUserSignedIn(false);
+    console.log("signed out");
+  }
+
+  const signInToApp = async() => {
+    console.log("attempting signin");
+    navigation.navigate('SignIn', {});
+    //console.log("signed in");
+  }
+
+
 
   return (
     <ScrollView>
@@ -155,16 +195,22 @@ const SettingsScreenComponent = ( {navigation} ) => {
         <View  style={styles.container}>
           <View style={styles.settingItem}>
             <Text style={styles.settingTitle}>{translate('signed_in')}</Text>
-            <Switch
-              trackColor={{ false: '#767577', true: '#3FDD57FF' }}
-              thumbColor={'#ffffff'}
-              ios_backgroundColor="#3fdd57"
-              onValueChange={googleSignOut}
-              value={false}
-            />
+         {userSignedIn ? (
+          // 👇 Render when signed in
+          <TouchableOpacity style={styles.googleButton} onPress={() => signOutOfApp()}>
+            <Text style={styles.googleButtonText}>{translate('sign_out')}</Text>
+          </TouchableOpacity>
+        ) : (
+          // 👇 Render when not signed in
+          <TouchableOpacity style={styles.googleButton} onPress={() => signInToApp()}>
+            <Text style={styles.googleButtonText}>{translate('sign_in')}</Text>
+          </TouchableOpacity>
+        )}
+
           </View>
         </View>
       </>
+    {userSignedIn ? (
       <>
       <View  style={styles.container}>
         <View style={{ height: 200, justifyContent: 'top' }}>
@@ -190,6 +236,10 @@ const SettingsScreenComponent = ( {navigation} ) => {
         </View>
       </View>
       </>
+  ) : (  
+     <></>
+  )}
+    {userSignedIn ? (
 
       <>
       <View  style={styles.container}>
@@ -200,6 +250,10 @@ const SettingsScreenComponent = ( {navigation} ) => {
         </TouchableOpacity>
       </View>
       </>
+  ) : (  
+     <></>
+  )}
+    {userSignedIn ? (
 
       <>
       <View  style={styles.container}>
@@ -210,6 +264,10 @@ const SettingsScreenComponent = ( {navigation} ) => {
         </TouchableOpacity>
       </View>
       </>
+  ) : (  
+     <></>
+  )}
+    {userSignedIn ? (
 
       <>
       <View  style={styles.container}>
@@ -220,6 +278,10 @@ const SettingsScreenComponent = ( {navigation} ) => {
           </TouchableOpacity>
       </View>
       </>
+  ) : (  
+     <></>
+  )}
+    {userSignedIn ? (
 
       <>
       <View  style={styles.container}>
@@ -230,7 +292,28 @@ const SettingsScreenComponent = ( {navigation} ) => {
           </TouchableOpacity>
       </View>
       </>
-
+  ) : (  
+     <></>
+  )}
+      
+      <>
+      <View  style={styles.container}>
+          <Text style={styles.settingTitle}>{translate('terms_of_use_title')}</Text>
+          <Text style={styles.text}>{translate('terms_of_use_text')}</Text>
+          <TouchableOpacity style={styles.googleButton} onPress={() => viewTermsOfUse() }>
+            <Text style={styles.googleButtonText}>{translate('terms_of_use_button_text')}</Text>
+          </TouchableOpacity>
+      </View>
+      </>
+      <>
+      <View  style={styles.container}>
+          <Text style={styles.settingTitle}>{translate('privacy_policy_title')}</Text>
+          <Text style={styles.text}>{translate('privacy_policy_text')}</Text>
+          <TouchableOpacity style={styles.googleButton} onPress={() => viewPrivacyPolicy() }>
+            <Text style={styles.googleButtonText}>{translate('privacy_policy_button_text')}</Text>
+          </TouchableOpacity>
+      </View>
+      </>
 
       <>
       <View  style={styles.container}>
@@ -345,3 +428,15 @@ const styles = StyleSheet.create({
 });
 
 export default SettingsScreenComponent;
+
+
+/*
+
+<Switch
+              trackColor={{ false: '#767577', true: '#3FDD57FF' }}
+              thumbColor={'#ffffff'}
+              ios_backgroundColor="#3fdd57"
+              onValueChange={ signOut() }
+              value={false}
+            />
+*/

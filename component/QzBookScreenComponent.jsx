@@ -48,8 +48,10 @@ const QzBookScreenComponent = ( {route} ) => {
 
 
   const fetchData = async () => {
-    const  apiEndpoint = serverUrl + "/books/Book"; // Example endpoint
+    const  apiEndpoint = serverUrl + "/books/qzBook"; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
+    console.log("fetchData for book");
+    
     let newEndpoint = apiEndpoint + "?bookid=" + id;
     try {
       const response = await fetch(newEndpoint, {
@@ -77,8 +79,15 @@ const QzBookScreenComponent = ( {route} ) => {
           }
         }
       } else {
+        console.log("json in qzBook")
         const json = await response.json();
-        setData(json);
+        console.log(json);
+        if(json.message=="success") {
+          setData(json.book);
+        }
+        else {
+          setMessage(json.message);
+        }
       }
     } catch (error) {
       console.log("Error in BookScreenComponent");

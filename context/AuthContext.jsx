@@ -12,7 +12,8 @@ export const AuthContext = createContext("");
 
 export const AuthProvider = ({ children }) => {
 
-    const [googleMessage, setGoogleMessage] = useState("Not Signed In");
+    //const [googleMessage, setGoogleMessage] = useState("Not Signed In");
+    const [message, setMessage] = useState("");
     const [userProfile, setUserProfile] = useState(undefined);
     const [jwtToken, setJwtToken] = useState("");
     const [refreshToken, setRefreshToken] = useState("");
@@ -26,35 +27,62 @@ export const AuthProvider = ({ children }) => {
         serverUrl = Environment.IOS_NODE_SERVER_URL;
     }
 
+    /*
     const saveJwtToken = async(token) => {
         try {
             // You can use a static string like 'jwtToken' for the username
             // or a user-specific identifier if needed.
             await Keychain.setGenericPassword('jwtToken', token);
-            //console.log('JWT token saved successfully!');
+            console.log('JWT token saved successfully!');
+        } catch (error) {
+            console.error('Error saving JWT token:', error);
+        }
+    }
+*/
+    const saveJwtToken = async (token) => {
+        try {
+            await Keychain.setGenericPassword(
+            'jwtToken',
+            token,
+            {
+                accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED, // allows access when device is unlocked
+                storage: Keychain.STORAGE_TYPE.AES, // optional, modern storage backend
+                service: 'com.sacredrecords.jwt', // your unique key
+            }
+            );
+            console.log('JWT token saved successfully!');
+        } catch (error) {
+            console.error('Error saving JWT token:', error);
+        }
+    };
+    const saveRefreshToken = async(token) => {
+        try {
+            await Keychain.setGenericPassword(
+            'refreshToken',
+            token,
+            {
+                accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED, // allows access when device is unlocked
+                storage: Keychain.STORAGE_TYPE.AES, // optional, modern storage backend
+                service: 'com.sacredrecords.refresh', // your unique key
+            }
+            );
+            console.log('JWT token saved successfully!');
         } catch (error) {
             console.error('Error saving JWT token:', error);
         }
     }
 
-    const saveRefreshToken = async(token) => {
-        try {
-            // You can use a static string like 'jwtToken' for the username
-            // or a user-specific identifier if needed.
-            await Keychain.setGenericPassword('refreshToken', token);
-            //console.log('JWT token saved successfully!');
-        } catch (error) {
-            console.error('Error saving JWT token:', error);
-        }
-    }
 
 
     const retrieveJwtToken = async () => {
         try {
-            const credentials = await Keychain.getGenericPassword({ service: 'jwtToken' });
-            return credentials ? credentials.password : null;
+            const credentials = await Keychain.getGenericPassword({ service: 'com.sacredrecords.jwt' });
+            if (credentials) {
+            return credentials.password;
+            }
+            return null;
         } catch (error) {
-            console.error('Error loading access token:', error);
+            console.error('Error retrieving JWT token:', error);
             return null;
         }
     };
@@ -62,19 +90,23 @@ export const AuthProvider = ({ children }) => {
     // Load refresh token
     const retrieveRefreshToken = async () => {
         try {
-            const credentials = await Keychain.getGenericPassword({ service: 'refreshToken' });
-            return credentials ? credentials.password : null;
+            const credentials = await Keychain.getGenericPassword({ service: 'com.sacredrecords.refresh' });
+            if (credentials) {
+            return credentials.password;
+            }
+            return null;
         } catch (error) {
-            console.error('Error loading refresh token:', error);
+            console.error('Error retrieving refresh token:', error);
             return null;
         }
+
     };
 
 
 
     const deleteJwtToken = async() => {
         try {
-            await Keychain.resetGenericPassword({ service: 'jwtToken' }); // clears refresh token
+            await Keychain.resetGenericPassword({ service: 'com.sacredrecords.jwt' }); // clears refresh token
         } catch (error) {
             console.error('Error deleting JWT token:', error);
         }
@@ -82,7 +114,7 @@ export const AuthProvider = ({ children }) => {
 
     const deleteRefreshToken = async() => {
         try {
-            await Keychain.resetGenericPassword({ service: 'refreshToken' }); // clears refresh token
+            await Keychain.resetGenericPassword({ service: 'com.sacredrecords.refresh' }); // clears refresh token
         } catch (error) {
             console.error('Error deleting JWT token:', error);
         }
@@ -127,14 +159,41 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+
+  const signOut = async () => {
+        console.log("signOut in auth context");
+        try {
+            //const signoutResponse = await GoogleSignin.signOut();
+            setUserProfile(undefined);
+            setJwtToken("");
+            setRefreshToken("");
+            deleteJwtToken();
+            deleteRefreshToken();
+            setTemporaryJwtToken("");
+            setTemporaryRefreshToken("");
+            try {
+                await GoogleSignin.signOut();
+                setMessage('Not Signed In'); 
+            } catch (error) {
+
+            }
+
+            // need to do GoogleSignin.disconnect also.
+        } catch (error) {
+            console.log('Google Sign-Out Error: ', error);
+        }
+    }
+
+
     const googleSignIn = async () => {
+        console.log("googleSignIn");
        try {
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-            //console.log("play services passed")
+            console.log("play services passed")
             const response = await GoogleSignin.signIn();
-            //console.log(response);
+            console.log(response);
             if(isSuccessResponse(response)){
-                //console.log("Google Sign-In Success: ", response.data );
+                console.log("Google Sign-In Success: ", response.data );
                 let user = response.data.user;
                 let idToken = response.data.idToken;
 
@@ -165,17 +224,17 @@ export const AuthProvider = ({ children }) => {
                     }
 
                     if(obj?.jwtToken) {
-                        //console.log("Next is the signIn jwt token value");
-                        //console.log(obj.jwtToken);
+                        console.log("Next is the signIn jwt token value");
+                        console.log(obj.jwtToken);
                         setJwtToken(obj.jwtToken || "");
                         setRefreshToken(obj.refreshToken || "");
-                        setGoogleMessage("Logged In Successfully");
+                        setMessage("Logged In Successfully");
                         setUserProfile(user);
-                        //setUserToken(idToken);
-                        saveJwtToken(obj.jwtToken);
-                        saveRefreshToken(obj.refreshToken);
+                        await saveJwtToken(obj.jwtToken);
+                        await saveRefreshToken(obj.refreshToken);
                         setTemporaryJwtToken("");
                         setTemporaryRefreshToken("");
+                        setMessage(obj.message);
                         return "true";
 
                     } else {
@@ -188,7 +247,7 @@ export const AuthProvider = ({ children }) => {
                 }
             } else {
                 //console.log("NOT Successful: ", response.data );
-                setGoogleMessage( "Not Successful");
+                setMessage( "Not Successful");
                 setUserProfile(undefined);
                 deleteJwtToken();
                 deleteRefreshToken();
@@ -202,7 +261,7 @@ export const AuthProvider = ({ children }) => {
             //console.log("Error: ", error );
 
             if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-                setGoogleMessage('User cancelled the login flow');
+                setMessage('User cancelled the login flow');
                 setUserProfile(undefined);
                 setJwtToken("");
                 setRefreshToken("");
@@ -211,7 +270,7 @@ export const AuthProvider = ({ children }) => {
                 setTemporaryJwtToken("");
                 setTemporaryRefreshToken("");
             } else if (error.code === statusCodes.IN_PROGRESS) {
-                setGoogleMessage('Sign in is in progress already');
+                setMessage('Sign in is in progress already');
                 setUserProfile(undefined);
                 setJwtToken("");
                 setRefreshToken("");
@@ -220,7 +279,7 @@ export const AuthProvider = ({ children }) => {
                 setTemporaryJwtToken("");
                 setTemporaryRefreshToken("");
             } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-                setGoogleMessage('Play services not available or outdated');
+                setMessage('Play services not available or outdated');
                 setUserProfile(undefined);
                 setJwtToken("");
                 setRefreshToken("");
@@ -229,7 +288,7 @@ export const AuthProvider = ({ children }) => {
                 setTemporaryJwtToken("");
                 setTemporaryRefreshToken("");
             } else {
-                setGoogleMessage(`Some other error happened: ${error.message}`);
+                setMessage(`Some other error happened: ${error.message}`);
                 setUserProfile(undefined);
                 setJwtToken("");
                 setRefreshToken("");
@@ -249,7 +308,7 @@ export const AuthProvider = ({ children }) => {
         const userid = userProfile?.id  || "0";
         try {
             const signoutResponse = await GoogleSignin.signOut();
-            setGoogleMessage('Not Signed In'); 
+            setMessage('Not Signed In'); 
             setUserProfile(undefined);
             setJwtToken("");
             setRefreshToken("");
@@ -265,7 +324,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     const appleSignIn = async (response, userData) => {
-        //console.log("appleSignIn");
+        console.log("appleSignIn");
         //let fullName = userData?.fullName?.givenName + " " + userData?.fullName?.familyName || "";
         //let givenName = userData?.fullName?.givenName || "";
         //let familyName = userData?.fullName?.familyName || "";
@@ -303,10 +362,12 @@ export const AuthProvider = ({ children }) => {
                 return postResponse.status;
             }
             const responseData = await postResponse.json();
-            //console.log("responseData");
-            //console.log(responseData);
+            console.log("responseData");
+            console.log(responseData);
             //console.log(responseData.language);
             //const obj = JSON.parse(responseData);
+            //console.log("obj");
+            //console.log(obj);
             if(responseData?.language && (responseData.language != "")) {
                 //console.log("Language from server: " + obj.language);
                 setLanguage(responseData.language);
@@ -314,17 +375,25 @@ export const AuthProvider = ({ children }) => {
             let message = responseData.message;
             let jwtToken = responseData.jwtToken;
             let refreshToken = responseData.refreshToken;
-            if(responseData.message!="updateProfile") {
-                //console.log("this is the responseData.user");
-                //console.log(responseData.user);
-                setUserProfile(responseData.user);
+            if(responseData.message!="success") {
                 setJwtToken(responseData.jwtToken || "");
                 setRefreshToken(responseData.refreshToken || "");
-                saveJwtToken(responseData.jwtToken);
-                saveRefreshToken(responseData.refreshToken);
+                await saveJwtToken(responseData.jwtToken);
+                await saveRefreshToken(responseData.refreshToken);
+                setMessage(responseData.message);
+            } else if(responseData.message!="updateProfile") {
+                console.log("this is the responseData.user");
+                console.log(responseData.user);
+                //setUserProfile(responseData.user);
+                setJwtToken(responseData.jwtToken || "");
+                setRefreshToken(responseData.refreshToken || "");
+                await saveJwtToken(responseData.jwtToken);
+                await saveRefreshToken(responseData.refreshToken);
+                setMessage(responseData.message);
             } else {
                 setTemporaryJwtToken(responseData.jwtToken || "");
                 setTemporaryRefreshToken(responseData.refreshToken || "");
+                setMessage(responseData.message);
             }
 
             return responseData.message;
@@ -337,6 +406,8 @@ export const AuthProvider = ({ children }) => {
             deleteRefreshToken();
             setTemporaryJwtToken("");
             setTemporaryRefreshToken("");
+            setMessage(error.message);
+
             return false;
         }
         return false;
@@ -401,7 +472,7 @@ export const AuthProvider = ({ children }) => {
             if(obj?.jwtToken) {
                 setJwtToken(obj.jwtToken || "");
                 setRefreshToken(obj.refreshToken || "");
-                setGoogleMessage("Logged In Successfully");
+                setMessage("Logged In Successfully");
                 setUserProfile(user);
                 saveJwtToken(obj.jwtToken);
                 saveRefreshToken(obj.refreshToken);
@@ -412,7 +483,7 @@ export const AuthProvider = ({ children }) => {
                 console.log("No JWT Token returned from server.");
                 setJwtToken("");
                 setRefreshToken("");
-                setGoogleMessage("Not Logged In");
+                setMessage("Not Logged In");
                 setUserProfile();
                 deleteJwtToken();
                 deleteRefreshToken();
@@ -489,7 +560,7 @@ export const AuthProvider = ({ children }) => {
 
 
     return (
-        <AuthContext.Provider value={{ cognitoSignIn, cognitoCreateAccount, cognitoVerifyAccount, appleSignIn, googleSignIn, googleSignOut, googleMessage, setGoogleMessage, userProfile, setUserProfile, jwtToken,  setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, refreshJwtToken, setRefreshToken, temporaryJwtToken, setTemporaryJwtToken, temporaryRefreshToken, setTemporaryRefreshToken }}>
+        <AuthContext.Provider value={{ signOut, cognitoSignIn, cognitoCreateAccount, cognitoVerifyAccount, appleSignIn, googleSignIn, googleSignOut, userProfile, setUserProfile, jwtToken,  setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, refreshJwtToken, setRefreshToken, retrieveRefreshToken, deleteRefreshToken, temporaryJwtToken, setTemporaryJwtToken, temporaryRefreshToken, setTemporaryRefreshToken }}>
             { children }
         </AuthContext.Provider>
     );

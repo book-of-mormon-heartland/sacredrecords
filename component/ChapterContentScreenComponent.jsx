@@ -16,7 +16,7 @@ const ChapterContentScreenComponent = ( {route}) => {
   const { language, setLanguage, translate } = useI18n();
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const {  setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
   //const { id } = route.params;
   const navigation = useNavigation();
   const isIOS = ( Platform.OS === 'ios' );
@@ -27,7 +27,8 @@ const ChapterContentScreenComponent = ( {route}) => {
   const { id, title, positionX, positionY, fetchBookmark, bookId } = route.params;
   const [chapterData, setChapterData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [bookmark, setBookmark] = useState(true);
+  
   const [paragraphs, setParagraphs] = useState([]);
   const [chapterSubtitle, setChapterSubtitle] = useState("");
   const [chapterTitle, setChapterTitle] = useState("");
@@ -45,6 +46,11 @@ const ChapterContentScreenComponent = ( {route}) => {
     const  apiEndpoint = serverUrl + "/chapters/chapterContentText"; // Example endpoint
     setIsLoading(true);
     const myJwtToken = await retrieveJwtToken();
+    if(!jwtToken) {
+      setBookmark(false);
+    } else {
+      setBookmark(true);
+    }
     let newEndpoint = apiEndpoint + "?id=" + id;
     try {
       const response = await fetch(newEndpoint, {
@@ -385,6 +391,7 @@ const ChapterContentScreenComponent = ( {route}) => {
         </TouchableOpacity>
       </View>
     </ScrollView>
+     {jwtToken ? (
       <TouchableOpacity
         style={styles.floatingButton}
         onPress={() => createBookmark()}
@@ -392,6 +399,9 @@ const ChapterContentScreenComponent = ( {route}) => {
       >
         <Bookmark  stroke="black" fill="#fff" width={22} height={22}/>
       </TouchableOpacity>
+     ):(
+      <></>
+     ) }
     </View>
  );
 };

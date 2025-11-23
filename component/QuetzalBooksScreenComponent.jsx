@@ -17,12 +17,14 @@ const QuetzalBookScreenComponent = ( {route} ) => {
     const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const  stripeCallback = Environment.STRIPE_CALLBACK;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const { refreshJwtToken, setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const { jwtToken, refreshJwtToken, setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken,  deleteRefreshToken } = useContext(AuthContext);
   const { language, setLanguage, translate } = useI18n();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showSignIn, setShowSignIn] = useState(true);
   const [showBanner, setShowBanner] = useState(true);
+  const [dummy, setDummy] = useState(false);
   const navigation = useNavigation();
   const isIOS = ( Platform.OS === 'ios' );
   let serverUrl = Environment.NODE_SERVER_URL;
@@ -42,13 +44,14 @@ const QuetzalBookScreenComponent = ( {route} ) => {
   const subscribe = async() => {
     console.log("subscribe");
     if(isIOS) {
-      console.log("IOS subscribe request");
+      //console.log("IOS subscribe request");
       subscribeIos();
     } else {
       const subscriptionResults = await checkIfSubscribed();
       if(subscriptionResults.isSubscribed) {
         Alert.alert("You are already subscribed");
         setShowBanner(false);
+        setDummy(false);
         //await fetchData();
       } else {
         //console.log("you are not subscribed.  We shall proceed.");
@@ -72,7 +75,7 @@ const QuetzalBookScreenComponent = ( {route} ) => {
           if (error.code === "Canceled") {
             // Customer canceled - you should probably do nothing.
           } else {
-            Alert.alert(`Error code: ${error.code}`, error.message);
+            Alert.alert(`Error code: ${error.code}`, error?.message);
             // PaymentSheet encountered an unrecoverable error. You can display the error to the user, log it, etc.
           }
           
@@ -81,8 +84,8 @@ const QuetzalBookScreenComponent = ( {route} ) => {
           try {
 
             const clientSecretObj = await createQzSubscriptionIntent(setupIntentResponse);
-            console.log("clientSecretObj from createQzSubscriptionIntent");
-            console.log(clientSecretObj);
+            //console.log("clientSecretObj from createQzSubscriptionIntent");
+            //console.log(clientSecretObj);
 
             if(clientSecretObj === undefined) {
               console.log("There was an error processing your payment.  Please try again later.")
@@ -127,7 +130,7 @@ const QuetzalBookScreenComponent = ( {route} ) => {
 
 
     if (initError) {
-        Alert.alert(`Error initializing: ${initError.message}`);
+        Alert.alert(`Error initializing: ${initError?.message}`);
         return false;
     }
     return true;
@@ -150,7 +153,7 @@ const QuetzalBookScreenComponent = ( {route} ) => {
         if(response.status === 500) {
           const tokenRefreshObj = await refreshJwtToken();
           
-          if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
+          if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
             setJwtToken(tokenRefreshObj.jwtToken);
             saveJwtToken(tokenRefreshObj.jwtToken);
             //await createQzSubscriptionIntent();
@@ -201,7 +204,7 @@ const QuetzalBookScreenComponent = ( {route} ) => {
         if(response.status === 500) {
           const tokenRefreshObj = await refreshJwtToken();
           
-          if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
+          if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
             setJwtToken(tokenRefreshObj.jwtToken);
             saveJwtToken(tokenRefreshObj.jwtToken);
           } else {
@@ -240,7 +243,7 @@ const QuetzalBookScreenComponent = ( {route} ) => {
         if(response.status === 500) {
           const tokenRefreshObj = await refreshJwtToken();
           
-          if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
+          if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
             setJwtToken(tokenRefreshObj.jwtToken);
             saveJwtToken(tokenRefreshObj.jwtToken);
           } else {
@@ -282,7 +285,7 @@ const QuetzalBookScreenComponent = ( {route} ) => {
         if(response.status === 500) {
           const tokenRefreshObj = await refreshJwtToken();
           
-          if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
+          if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
             setJwtToken(tokenRefreshObj.jwtToken);
             saveJwtToken(tokenRefreshObj.jwtToken);
           } else {
@@ -295,6 +298,8 @@ const QuetzalBookScreenComponent = ( {route} ) => {
       } else {
         const responseData = await response.json();
         const obj = JSON.parse(responseData);
+        console.log("checking if subscribed");
+        console.log(obj);
         return obj;
       }
     } catch (error) {
@@ -323,90 +328,130 @@ const QuetzalBookScreenComponent = ( {route} ) => {
   const determineIfBannerNeeded = async() => {
     const  apiEndpoint = serverUrl + "/subscriptions/getSubscriptions"; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
+    
+    console.log("determining if banner is needed.");
+    if(!myJwtToken) {
+      console.log("In order to access this page, you must be logged in.");
+      //if(isIOS) {
+      //navigation.navigate('QuetzalLogin');
+      //} else {
+      //  navigation.navigate('AndroidSignIn');
+      //}
+      setShowBanner(false);
+      setDummy(true);
+    } else {
+      console.log("Banner has token");
+      try {
+        const response = await fetch(apiEndpoint, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${myJwtToken}`
+          }
+        });
+        if (!response.ok) {
+          if(response.status === 500) {
+            const tokenRefreshObj = await refreshJwtToken();
+            
+            if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
+              setJwtToken(tokenRefreshObj.jwtToken);
+              saveJwtToken(tokenRefreshObj.jwtToken);
+            } else {
+              // its been a week.  Login from this location.
+              setJwtToken();
+              deleteJwtToken();
+            }
+          }
+        } else {
+          const json = await response.json();
+          const message = JSON.parse(json);
+          if (message?.subscriptions.includes("quetzal-condor")) {
+            //console.log("Show banner");
+            //console.log(false);
+            setShowBanner(false);
+            setDummy(false);
+          } else {
+            //console.log("Show banner");
+            //console.log(true);
+            ///console.log("Show dummy");
+            //console.log(false);
+            setShowBanner(true);
+            setDummy(false);
+          }
+          //console.log("showBanner data");
+          //console.log(data);
+          //setData(json);
+
+        }
+      } catch (error) {
+        console.log("error in QuetzalBooksScreenComponent - banner");
+        console.log(error);
+        setShowBanner(true);
+      } finally {
+        //setLoading(false);
+      }
+    }
 
     //console.log(apiEndpoint);
-    try {
-      const response = await fetch(apiEndpoint, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${myJwtToken}`
-        }
-      });
-      if (!response.ok) {
-        if(response.status === 500) {
-          const tokenRefreshObj = await refreshJwtToken();
-          
-          if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
-            setJwtToken(tokenRefreshObj.jwtToken);
-            saveJwtToken(tokenRefreshObj.jwtToken);
-          } else {
-            // its been a week.  Login from this location.
-            setJwtToken();
-            deleteJwtToken();
-          }
-        }
-      } else {
-        const json = await response.json();
-        const message = JSON.parse(json);
-        if (message.subscriptions.includes("quetzal-condor")) {
-          setShowBanner(false);
-        } else {
-          setShowBanner(true);
-        }
-
-        //setData(json);
-      }
-    } catch (error) {
-      console.log("error in QuetzalBooksScreenComponent - banner");
-      console.log(error);
-      setShowBanner(true);
-    } finally {
-    }
   }
 
   const fetchData = async () => {
-    const  apiEndpoint = serverUrl + "/books/getBooksByCategory?category=quetzal-condor"; // Example endpoint
-    const myJwtToken = await retrieveJwtToken();
-    try {
-      const response = await fetch(apiEndpoint, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${myJwtToken}`
-        }
-      });
-      if (!response.ok) {
-        console.log("not okay");
-        if(response.status === 500) {
-          console.log("500");
-          const tokenRefreshObj = await refreshJwtToken();
-          console.log("tokenRefreshObject");
-          console.log(tokenRefreshObj);
-          if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
-            console.log("Token refresh valid token");
-            setJwtToken(tokenRefreshObj.jwtToken);
-            await saveJwtToken(tokenRefreshObj.jwtToken);
-            fetchData()
-          } else {
-            // its been a week.  Login from this location.
-            setJwtToken();
-            await deleteJwtToken();
+    setLoading(true);
+    const  apiEndpoint = serverUrl + "/books/getQzBooks"; // Example endpoint
+    //const  apiEndpoint = serverUrl + "/books/getSubscriptionBooks"; // Example endpoint
+    //const myJwtToken = await retrieveJwtToken();
+    
+
+    //console.log("myJwtToken token");
+    //console.log(myJwtToken);
+    //if(!jwtToken) {
+    //  console.log("fetch data In order to access this page, you must be logged in.");
+    //} else {
+      try {
+        const response = await fetch(apiEndpoint, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${jwtToken}`
           }
+        });
+        if (!response.ok) {
+          console.log("not okay");
+          /*
+          if(response.status === 500) {
+            console.log("500");
+            const tokenRefreshObj = await refreshJwtToken();
+            console.log("tokenRefreshObject");
+            console.log(tokenRefreshObj);
+            if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
+              console.log("Token refresh valid token");
+              setJwtToken(tokenRefreshObj.jwtToken);
+              await saveJwtToken(tokenRefreshObj.jwtToken);
+              //fetchData()
+            } else {
+              // its been a week.  Login from this location.
+              setJwtToken();
+              await deleteJwtToken();
+            }
+          }*/
+        } else {
+          const json = await response.json();
+          //console.log("json - got contents of page")
+          //console.log(json);
+          setData(json);
         }
-      } else {
-        const json = await response.json();
-        setData(json);
+      } catch (error) {
+        console.log("Error in QuetzalBooksScreenComponent fetchData");
+        console.log(error);
+        setError(error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.log("Error in QuetzalBooksScreenComponent fetchData");
-      console.log(error);
-      setError(error);
-    } finally {
-      setLoading(false);
-    }
+   
   };
 
   useFocusEffect(
+
     React.useCallback(() => {
+      console.log("in use focus effect");
       const loadData = async () => {
         await determineIfBannerNeeded();
         await fetchData();
@@ -416,9 +461,13 @@ const QuetzalBookScreenComponent = ( {route} ) => {
       return () => {
         // cleanup logic
       };
-    }, []) // Dependencies array
+    }, [jwtToken]) // Dependencies array
   );
 
+  const signInToApp = () => {
+     navigation.navigate('SignIn');
+
+  }
 
   const renderItem = ({ item }) => {
     return(
@@ -456,13 +505,88 @@ const QuetzalBookScreenComponent = ( {route} ) => {
   if (error) {
     return (
       <View style={styles.container}>
-        <Text>Error: {error.message}</Text>
+        <Text>Error: {error?.message}</Text>
       </View>
     );
   }
+  if(dummy && showSignIn) {
+    return (
+      <View style={styles.container} >
 
+        <>
+          <View style={styles.topImageContainerWithBanner}>
+            <TouchableOpacity style={styles.googleButton} onPress={() => signInToApp()}>
+              <Text style={styles.googleButtonText}>{translate('sign_in')}</Text>
+            </TouchableOpacity>
+            <Image
+              source={{ uri: 'https://storage.googleapis.com/sacred-records/quetzal-image-with-others-400x126.jpg' }}
+              style={ styles.topImage }
+            />
+          </View>
+          <FlatList
+            data={data}
+            renderItem={renderDummyItem}
+            keyExtractor={(item, index) => index.toString()} // Adjust keyExtractor based on your data structure        numColumns={2}
+            numColumns={3}
+            contentContainerStyle={styles.listContainer}
+          />
+          <Text style={styles.text}>{translate("copyright_protected")}</Text>
+        </>
+      </View>
+    );
+  } else if(dummy && !showSignIn && showBanner) {
+    return (
+      <View style={styles.container} >
+        <>
+          <LinearGradient
+            colors={['#6a11cb', '#2575fc']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.bannerContainer}
+          >
+            <View style={styles.textContainer}>
+              <Text style={styles.releaseTitle}>{translate('banner_title')}</Text>
+              <Text style={styles.subtitle}>{translate('banner_text_1')}</Text>
+              <StripeProvider
+                publishableKey={stripeKey} // Replace with your actual publishable key
+                urlScheme="com.sacredrecords" // Optional: required for 3D Secure and other payment methods
+                merchantIdentifier="merchant.io.trisummit" // Optional: required for Apple Pay
+              >
+                <TouchableOpacity style={styles.subscribeButton} onPress={() => subscribe() }>
+                    <Text style={styles.buttonText}>{translate('banner_button_text')}</Text>
+                </TouchableOpacity>
+              </StripeProvider>
+              <Text style={styles.subtitle}>
+                  {translate('banner_text_2')}
+              </Text>
+              <Text style={styles.price}>{translate('banner_text_3')}</Text>
+            </View>
+      
+          </LinearGradient>
+        </>
+        <>
+          <View style={styles.topImageContainerWithBanner}>
+            <Image
+              source={{ uri: 'https://storage.googleapis.com/sacred-records/quetzal-image-with-others-400x126.jpg' }}
+              style={ styles.topImage }
+            />
+          </View>
 
-  if(showBanner) {
+          <FlatList
+            data={data}
+            renderItem={renderDummyItem}
+            keyExtractor={(item, index) => index.toString()} // Adjust keyExtractor based on your data structure        numColumns={2}
+            numColumns={3}
+            contentContainerStyle={styles.listContainer}
+          />
+          <Text style={styles.text}>{translate("copyright_protected")}</Text>
+        </>
+
+      </View>
+
+    );
+
+  } else if(showBanner) {
     // show the banner and the items not clickable with message.
     return (
       <View style={styles.container} >
@@ -562,6 +686,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     width: 350,
 
+  },
+  signInView: {
+    paddingBottom: 20,
   },
   itemContainer: {
 
@@ -666,6 +793,30 @@ const styles = StyleSheet.create({
     color: '#ffdb58',
     marginBottom: 10,
   },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007bff', // White background for the button
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#E0E0E0', // Light gray border
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    marginBottom: 20, // For Android shadow
+    marginTop: 10, // For Android shadow
+  },
+  googleButtonText: {
+    color: '#ffffff', // Google's gray text color
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+
 });
 
 export default QuetzalBookScreenComponent;

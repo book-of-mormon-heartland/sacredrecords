@@ -7,6 +7,8 @@ import QzChaptersScreenComponent from './QzChaptersScreenComponent';
 import QzChapterContentScreenComponent from './QzChapterContentScreenComponent';
 import { useI18n } from '.././context/I18nContext'; 
 import AppleSubscriptionScreenComponent from './AppleSubscriptionScreenComponent';
+import QuetzalLoginScreenComponent from './QuetzalLoginScreenComponent';
+import LoginScreenComponent from './LoginScreenComponent';
 
 
 const BooksStack = createNativeStackNavigator();
@@ -18,7 +20,7 @@ const QuetzalCondorStackNavigatorComponent = () => {
   return (
     <BooksStack.Navigator>
       <BooksStack.Screen name="QuetzalBookshelf" options = {{
-          title: translate('quetzal_condor_council'),
+          title: translate('sacred_records'),
           headerTitleAlign: 'center',
         }} component={QuetzalBooksScreenComponent} />
       <BooksStack.Screen name="QzBook" component={QzBookScreenComponent} />
@@ -30,6 +32,14 @@ const QuetzalCondorStackNavigatorComponent = () => {
           title: translate('apple_subscription_button'),
           headerTitleAlign: 'center',
         }}   component={AppleSubscriptionScreenComponent} />
+      <BooksStack.Screen name="QuetzalLogin" component={QuetzalLoginScreenComponent} options = {{
+          title: translate('records_login'),
+          headerTitleAlign: 'center',
+        }} />
+      <BooksStack.Screen name="SignIn" component={LoginScreenComponent} options = {{
+          title: translate('records_login'),
+          headerTitleAlign: 'center',
+        }} />
     </BooksStack.Navigator>
   );
 };

@@ -1,6 +1,11 @@
 {
+  "sacred_records": "Sacred Records",
   "greeting": "Welcome to Sacred Records",
+  "quetzal_greeting": "In order to access the records page, you must be signed in.",
+  "records_login": "Records Sign In",
   "google_login": "Sign in with Google",
+  "sign_in": "Sign In",
+  "sign_out": "Sign Out",
   "home": "Home",
   "library": "Library",
   "bookshelf": "Bookshelf",
@@ -21,7 +26,7 @@
   "congratulations_book_completed": "Congratulations, you have reached the end of this book.",
   "no_previous_chapter": "There is no previous chapter.",
   "quetzal_condor": "Records",
-  "quetzal_condor_council": "First Circle of Chief's Disciples",
+  "quetzal_condor_council": "Sacred Records",
   "chapter": "Chapter",
   "subscribe_to_view": "Subscribe",
   "unsubscribe": "First Circle of Chief's Disciples Subscription",
@@ -57,7 +62,7 @@
   "delete_account_button_text": "Delete My Account",
   "delete_account_button": "Delete My Account",
   "version": "Application Version",
-  "build": "19.0 / 17",
+  "build": "19.0 / 24",
   "profile_settings_text":"Allows update of given name, family name, and email address.",
   "delete_profile_title":"Delete Personal Information",
   "delete_profile_button": "Proceed to Delete Personal Information",
@@ -84,8 +89,13 @@
   "donate_text": "Book of Mormon Heartland is a non-profit 501(c)3 organization dedicated to assisting in the unity movement of the indigenous people throughout North and South America. The expenses of the movement are too heavy for one person to bear.  Please assist in the movement by donating here.",
   "donate_button": "Donate Now",
   "supporting": "Supporting",
-  "book_of_mormon_heartland": "Book of Mormon Heartland"
-
+  "book_of_mormon_heartland": "Book of Mormon Heartland",
+  "terms_of_use_title": "Terms of Use (EULA)",
+  "terms_of_use_text": "Click below to view the Terms of Use (EULA).",
+  "terms_of_use_button_text": "View Terms of Use",
+  "privacy_policy_title": "Privacy Policy",
+  "privacy_policy_text": "Click below to view the Privacy Policy",
+  "privacy_policy_button_text": "View Privacy Policy"
 }
 
 

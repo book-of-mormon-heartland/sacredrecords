@@ -54,7 +54,7 @@ const QzChapterScreenComponent = ( {route} ) => {
 
   //let newEndpoint = apiEndpoint + "?parent=" + id;
   const fetchData = async () => {
-    const  apiEndpoint = serverUrl + "/chapters/chapters?parent=" + id; // Example endpoint
+    const  apiEndpoint = serverUrl + "/chapters/qzchapters?parent=" + id; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
     try {
       const response = await fetch(apiEndpoint, {
@@ -65,13 +65,14 @@ const QzChapterScreenComponent = ( {route} ) => {
       });
       if (!response.ok) {
         console.log("not okay");
+        console.log(response)
         if(response.status === 500) {
           console.log("500");
           console.log("tokenRefreshObject before");
           const tokenRefreshObj = await refreshJwtToken();
           console.log("tokenRefreshObject after");
           console.log(tokenRefreshObj);
-          if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
+          if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
             console.log("Token refresh valid token");
             setJwtToken(tokenRefreshObj.jwtToken);
             await saveJwtToken(tokenRefreshObj.jwtToken);
@@ -84,8 +85,11 @@ const QzChapterScreenComponent = ( {route} ) => {
         }
       } else {
         const json = await response.json();
-        //console.log("error on ChaptersScreenComponent");
-        setData(json);
+        console.log("chapters json")
+        console.log(json);
+        console.log(json?.message);
+        
+        setData(json.data);
       }
     } catch (error) {
       console.log("Error");
@@ -121,7 +125,7 @@ const QzChapterScreenComponent = ( {route} ) => {
   if (error) {
     return (
       <View style={styles.container}>
-        <Text>Error: {error.message}</Text>
+        <Text>Error: {error?.message}</Text>
       </View>
     );
   }

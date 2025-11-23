@@ -32,28 +32,29 @@ const AppleSubscriptionScreenComponent = ({route}) => {
 
   const getProducts = async () => {
     try {
-      const products = await RNIap.getActiveSubscriptions(subscriptionSkus);
-      //console.log('Available subscriptions', products);
+      const products = await RNIap.getSubscriptions(subscriptionSkus);
+      console.log('Available subscriptions', products);
       setSubscriptions(products);
-      //console.log(subscriptions);
+      console.log(subscriptions);
     } catch (err) {
       console.warn('getSubscriptions error', err);
     }
   };
 
   const subscribe = async() => {
-    //console.log("subscribe");
-    //console.log(RNIap);
+    console.log("subscribe");
+    console.log(RNIap);
 
     
     try {
-      if(subscriptions.length>0) {
+      if(subscriptions?.length>0) {
        const purchase = await RNIap.requestPurchase(subscriptions[0]);
-        //console.log('purchase success', purchase);
+        console.log('purchase success', purchase);
 
         // You’ll send this receipt to your backend
         const receipt = purchase.transactionReceipt;
-
+        console.log("receipt");
+        console.log(receipt);
         if (receipt) {
 
           const myJwtToken = await retrieveJwtToken();
@@ -68,11 +69,11 @@ const AppleSubscriptionScreenComponent = ({route}) => {
           if (!response.ok) {
 
             if(response.status === 400) {
-              //console.log("No Receipt");
+              console.log("No Receipt");
               setMessage("Subscription Attempt Failed. No Receipt. Contact customer support at brian.nettles@trisummit.io.");
             }
             if(response.status === 401) {
-              //console.log("No JwtToken");
+              console.log("No JwtToken");
               setMessage("No JwtToken");
             }            
             if(response.status === 500) {
@@ -91,7 +92,8 @@ const AppleSubscriptionScreenComponent = ({route}) => {
             }
           } else {
             setMessage(response.message);
-            //console.log(response);
+            console.log("response");
+            console.log(response);
             if(response.message=="success") {
               await RNIap.finishTransaction(purchase);
             }
@@ -99,7 +101,7 @@ const AppleSubscriptionScreenComponent = ({route}) => {
         }
  
       } else {
-        setMessage("There are no subscriptions available. Apple has not released it yet. The subscription has been made in App Store Connect and is called sacred_records_monthly_subscription.");
+        setMessage("There are no subscriptions available. Apple, please work with me to get past this hurdle. The subscription has been made in App Store Connect and is called sacred_records_monthly_subscription.  I have successfully tested it in your sandbox environment.");
       }
     } catch (err) {
       console.warn('Purchase error', err);

@@ -30,7 +30,7 @@ const TabsComponent = ( ) => {
 <Tab.Screen name="Library-Main" component={BookStackNavigatorComponent} 
 */
 
-    if (jwtToken?.length>0) {
+  //  if (jwtToken?.length>0) {
         return (
             <Tab.Navigator>
                 <Tab.Screen name="Quetzal" component={QuetzalCondorStackNavigatorComponent}
@@ -120,6 +120,7 @@ const TabsComponent = ( ) => {
                 />
             </Tab.Navigator>
         );
+        /*
     } else {
         return (
             <Tab.Navigator>
@@ -143,6 +144,7 @@ const TabsComponent = ( ) => {
             </Tab.Navigator>
         );
     }
+    */
 }
 
 export default TabsComponent;

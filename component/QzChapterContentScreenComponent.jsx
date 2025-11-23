@@ -42,9 +42,10 @@ const QzChapterContentScreenComponent = ( {route}) => {
 
 
   const fetchData = async (id) => {
-    const  apiEndpoint = serverUrl + "/chapters/chapterContentText"; // Example endpoint
-    setIsLoading(true);
+    const  apiEndpoint = serverUrl + "/chapters/qzChapterContentText"; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
+
+    setIsLoading(true);
     let newEndpoint = apiEndpoint + "?id=" + id;
     try {
       const response = await fetch(newEndpoint, {
@@ -61,7 +62,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
           const tokenRefreshObj = await refreshJwtToken();
           console.log("tokenRefreshObject after");
           console.log(tokenRefreshObj);
-          if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
+          if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
             console.log("Token refresh valid token");
             setJwtToken(tokenRefreshObj.jwtToken);
             await saveJwtToken(tokenRefreshObj.jwtToken);
@@ -73,8 +74,16 @@ const QzChapterContentScreenComponent = ( {route}) => {
           }
         }
       } else {
+        console.log("We got a response");
         const json = await response.json();
-        let myChapter = json[0];
+        console.log(json);
+        let myChapter = {};
+        if(json?.message=="success") {
+          console.log("we got a success");
+          console.log(json);
+          myChapter=json?.data[0];
+        }
+        //let myChapter = json[0];
         //setBookId(myChapter.parent); // only needed for bookmarks
         setChapterData(myChapter);
         setParagraphs(myChapter.content);
@@ -88,7 +97,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
         
       }
     } catch (error) {
-      console.log("Error in ChapterContentScreenComponent");
+      console.log("Error in qzChapterContentScreenComponent");
       console.log(error);
       setError(error);
     } finally {
@@ -113,7 +122,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
       if (!response.ok) {
         if(response.status === 500) {
           const tokenRefreshObj = await refreshJwtToken();
-          if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
+          if(tokenRefreshObj?.message === "valid-token" || tokenRefreshOb?.message === "update-jwt-token") {
             setJwtToken(tokenRefreshObj.jwtToken);
             await saveJwtToken(tokenRefreshObj.jwtToken);
             fetchData();

@@ -3,6 +3,7 @@ import BookshelfScreenComponent from './BookshelfScreenComponent';
 import BookScreenComponent from './BookScreenComponent';
 import ChaptersScreenComponent from './ChaptersScreenComponent';
 import ChapterContentScreenComponent from './ChapterContentScreenComponent';
+import LoginScreenComponent from './LoginScreenComponent';
 import { useI18n } from '.././context/I18nContext'; 
 
 const BooksStack = createNativeStackNavigator();
@@ -22,6 +23,11 @@ const BookStackNavigatorComponent = () => {
       <BooksStack.Screen name="Book" component={BookScreenComponent} />
       <BooksStack.Screen name="Chapters" component={ChaptersScreenComponent} />
       <BooksStack.Screen name="ChapterContent" component={ChapterContentScreenComponent} />
+      <BooksStack.Screen name="SignIn" component={LoginScreenComponent} options = {{
+          title: translate('sign_in'),
+          headerTitleAlign: 'center',
+        }} />
+
     </BooksStack.Navigator>
   );
 };

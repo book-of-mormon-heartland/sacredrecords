@@ -1,6 +1,11 @@
 {
+  "sacred_records": "Anales Sagrados",
   "greeting": "Bienvenidos a Anales Sagrados",
+  "quetzal_greeting": "Para acceder a la página de registros, debe iniciar sesión.",
   "google_login": "Iniciar sesión con Google",
+  "records_login": "Iniciar sesión en Annals",
+  "sign_in": "Iniciar sesión",
+  "sign_out": "Desconectar",
   "home": "Casa",
   "library": "Biblioteca",
   "bookshelf": "Libros",
@@ -56,7 +61,7 @@
   "delete_account_button_text": "Eliminar mi cuenta",
   "delete_account_button": "Eliminar mi cuenta",
   "version": "Versión de la aplicación",
-  "build": "19.0 / 17",
+  "build": "19.0 / 24",
   "profile_settings_text":"Permite actualizar el nombre, apellido y dirección de correo electrónico.",
   "delete_profile_title":"Eliminar información personal",
   "delete_profile_button": "Proceder a eliminar información personal",
@@ -83,6 +88,11 @@
   "donate_text": "Book of Mormon Heartland es una organización sin fines de lucro 501(c)3 dedicada a apoyar el movimiento de unidad de los pueblos indígenas de Norteamérica y Sudamérica. Los gastos del movimiento son demasiado elevados para que una sola persona los cubra. Por favor, colabore con el movimiento haciendo una donación aquí.",
   "donate_button": "Dona ahora",
   "supporting": "Secundario",
-  "book_of_mormon_heartland": "Corazón del Libro de Mormón"
-
+  "book_of_mormon_heartland": "Corazón del Libro de Mormón",
+  "terms_of_use_title:": "Condiciones de uso (EULA)",
+  "terms_of_use_text": "Haga clic a continuación para ver los Términos de uso (EULA).",
+  "terms_of_use_button_text": "Ver condiciones de uso",
+  "privacy_policy_title": "Política de Privacidad",
+  "privacy_policy_text": "Haga clic a continuación para ver la Política de privacidad",
+  "privacy_policy_button_text": "Ver la política de privacidad"
 }

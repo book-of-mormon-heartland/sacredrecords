@@ -6,16 +6,19 @@ import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
 import { Platform } from 'react-native';
 import { useNavigation, navigate, CommonActions } from '@react-navigation/native';
-import { Bookmark } from "react-native-feather";
+import { Bookmark, Trash2 } from "react-native-feather";
 
 const BookmarksScreenComponent = ( {route} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const {  refreshJwtToken, setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const {jwtToken, refreshJwtToken, setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showSignIn, setShowSignIn] = useState(true);
+  
+  const [displaySignin, setDisplaySignin] = useState(true);
   const navigation = useNavigation();
   const isIOS = ( Platform.OS === 'ios' );
   let serverUrl = Environment.NODE_SERVER_URL;
@@ -27,6 +30,7 @@ const BookmarksScreenComponent = ( {route} ) => {
   const renderItem = ({ item }) => {
     //console.log(item);
     return(
+      <View style={styles.row}>
       <TouchableOpacity
         style={styles.listItem}
         onPress={( ) => 
@@ -44,11 +48,6 @@ const BookmarksScreenComponent = ( {route} ) => {
               chaptersDescription = "QzChapters";
               chapterContentDescription = "QzChapterContent";
             }
-
-
-
-
-
 
             // Handle navigation to the chapter text
             navigation.dispatch(
@@ -82,7 +81,7 @@ const BookmarksScreenComponent = ( {route} ) => {
                           screen: chapterContentDescription,
                           params: {
                             id: item.chapterId,
-                            title: item.chapterTitle,
+                            title: item.bookTitle,
                             bookId: item.bookId,
                             fetchBookmark: "yes"
                           }
@@ -102,20 +101,92 @@ const BookmarksScreenComponent = ( {route} ) => {
           <Text style={styles.chapterSubtitle}>{item.chapterTitle}</Text>
         </View>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleDelete(item)}
+      >
+        <Trash2 stroke="black" fill="#fff" width={22} height={22}/>
+    </TouchableOpacity>
+    </View>
     );
   }
+  
+    const signInToApp = () => {
+        navigation.navigate('SignIn');
+    }
   
 
   //let newEndpoint = apiEndpoint + "?parent=" + id;
   const fetchData = async () => {
     const  apiEndpoint = serverUrl + "/bookmarks/getBookmarks"; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
+    //let jwtToken = "";
+    if(myJwtToken) {
+      //jwtToken=myJwtToken; 
+      setShowSignIn(false);
+    } else {
+      setShowSignIn(true);
+    }
+
+    if(!myJwtToken) {
+      //we are not going to do anything except display a signin button.
+      setDisplaySignin(true);
+      setLoading(false);
+    } else {
+      setDisplaySignin(false);
+      try {
+        const response = await fetch(apiEndpoint, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${myJwtToken}`
+          }
+        });
+        if (!response.ok) {
+          if(response.status === 500) {
+            const tokenRefreshObj = await refreshJwtToken();
+            if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
+              setJwtToken(tokenRefreshObj.jwtToken);
+              await saveJwtToken(tokenRefreshObj.jwtToken);
+              fetchData();
+            } else {
+              // its been a week.  Login from this location.
+              setJwtToken();
+              await deleteJwtToken();
+            }
+          }
+        } else {
+          const json = await response.json();
+          //console.log("bookmarks data");
+          //console.log(json);
+          setData(json);
+        }      
+      } catch (error) {
+        console.log("Error in BookmarkScreenComponent");
+        console.log(error);
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+
+
+    }
+  }
+
+  const handleDelete = async(item) => {
+    console.log("delete item");
+    console.log(item);
+    const myJwtToken = await retrieveJwtToken();
     try {
-      const response = await fetch(apiEndpoint, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${myJwtToken}`
-        }
+      const response = await fetch(serverUrl + "/bookmarks/removeBookmark", {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${myJwtToken}`
+          },
+          body: JSON.stringify({ 
+              bookId: item.bookId
+          }),
       });
       if (!response.ok) {
         if(response.status === 500) {
@@ -132,9 +203,7 @@ const BookmarksScreenComponent = ( {route} ) => {
         }
       } else {
         const json = await response.json();
-        //console.log("bookmarks data");
-        //console.log(json);
-        setData(json);
+        fetchData();
       }      
     } catch (error) {
       console.log("Error in BookmarkScreenComponent");
@@ -143,14 +212,18 @@ const BookmarksScreenComponent = ( {route} ) => {
     } finally {
       setLoading(false);
     }
-  }
+
+
+
+
+  } 
 
   useFocusEffect(
     React.useCallback(() => {
       fetchData();
       return () => {
       };
-    }, [])
+    }, [jwtToken])
   );
 
   if (loading) {
@@ -170,19 +243,32 @@ const BookmarksScreenComponent = ( {route} ) => {
     );
   }
 
-
-  return (
-    <View style={styles.container}>
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()} // Adjust keyExtractor based on your data structure        numColumns={2}
-        numColumns={1}
-        contentContainerStyle={styles.listContainer}
-      />
-    </View>
-  );    
-};
+  if(showSignIn) {
+    return (
+      <View style={styles.container}>
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()} // Adjust keyExtractor based on your data structure        numColumns={2}
+          numColumns={1}
+          contentContainerStyle={styles.listContainer}
+        />
+      </View>
+    );    
+  } else {
+    return (
+      <View style={styles.container}>
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()} // Adjust keyExtractor based on your data structure        numColumns={2}
+          numColumns={1}
+          contentContainerStyle={styles.listContainer}
+        />
+      </View>
+    );    
+  };
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -198,11 +284,20 @@ const styles = StyleSheet.create({
     justifyContent: 'top',
     alignItems: 'center',
   },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    marginBottom: 10,
+  },
   listContainer: {
     padding: 10,
   },
   listItem: {
-    width:325,
+    width:275,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f9f9f9',
@@ -227,7 +322,11 @@ const styles = StyleSheet.create({
   },
   bookmarkContainer: {
     paddingRight: 10,
-  }
+  },
+  deleteButton: {
+    paddingLeft: 15,
+    paddingVertical: 4,
+  },
 });
 
 export default BookmarksScreenComponent;

@@ -13,7 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
-const LoginScreenComponent = ( {route} ) => {
+const QuetzalLoginScreenComponent = ( {route} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
@@ -62,6 +62,15 @@ const LoginScreenComponent = ( {route} ) => {
         }
 
         let message = await appleSignIn( appleAuthRequestResponse, userData);
+        console.log("message from apple sign in");
+        console.log(message);
+          if(message==="success") {
+            console.log("about to go to QuetzalBookshelf");
+            navigation.navigate('QuetzalBookshelf');
+          } else {
+            console.log("Need an error message to go to the screen");
+          }
+
 
       } else if (credentialState === appleAuth.State.NOT_FOUND) {
         console.log("User Not found.");
@@ -76,7 +85,17 @@ const LoginScreenComponent = ( {route} ) => {
         Alert.alert("User Revoked");
 
         if(process.env.ENVIRONMENT === "development") {
-          appleSignIn( appleAuthRequestResponse);
+          let message = await appleSignIn( appleAuthRequestResponse);
+          //let message = await appleSignIn( appleAuthRequestResponse, userData);
+          console.log("message from apple sign in");
+          console.log(message);
+          if(message==="success") {
+            console.log("about to go to QuetzalBookshelf");
+            navigation.navigate('QuetzalBookshelf');
+          } else {
+            console.log("Need an error message to go to the screen");
+          }
+
         }
 
       }
@@ -85,7 +104,6 @@ const LoginScreenComponent = ( {route} ) => {
       console.error(error);
       //Alert.alert('Apple Login Error', error.message);
     }
-    navigation.goBack();
   }
 
 
@@ -94,7 +112,6 @@ const LoginScreenComponent = ( {route} ) => {
     //setLoading(true);
     await googleSignIn()
     //setLoading(false);
-    navigation.goBack();
   }
 
   if (loading) {
@@ -133,7 +150,7 @@ const LoginScreenComponent = ( {route} ) => {
     return (
       <View style={styles.loginContainer}>
 
-        <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>{translate('greeting')}</Text>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>{translate('quetzal_greeting')}</Text>
         <Image source={require('.././assets/sacred-records-logo-200x200.png')} style={styles.loginScreenImage} />
         <CognitoLoginScreenComponent />
         <Text style={styles.bottomText}>{translate("login_issue")}</Text>
@@ -263,5 +280,6 @@ const styles = StyleSheet.create({
 
 });
 
-export default LoginScreenComponent;
+export default QuetzalLoginScreenComponent;
+
 
