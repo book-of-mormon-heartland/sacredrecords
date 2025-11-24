@@ -37,6 +37,8 @@ const QzChapterContentScreenComponent = ( {route}) => {
   //const [bookId, setBookId] = useState("");
   const [currentY, setCurrentY] = useState(0);
   const scrollViewRef = useRef(null);
+  const [bookmarkChapterId, setBookmarkChapterId] = useState("");
+  
 
 
 
@@ -44,6 +46,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
   const fetchData = async (id) => {
     const  apiEndpoint = serverUrl + "/chapters/qzChapterContentText"; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
+    setBookmarkChapterId(id);
 
     setIsLoading(true);
     let newEndpoint = apiEndpoint + "?id=" + id;
@@ -74,13 +77,13 @@ const QzChapterContentScreenComponent = ( {route}) => {
           }
         }
       } else {
-        console.log("We got a response");
+        //console.log("We got a response");
         const json = await response.json();
-        console.log(json);
+        //console.log(json);
         let myChapter = {};
         if(json?.message=="success") {
-          console.log("we got a success");
-          console.log(json);
+          //console.log("we got a success");
+          //console.log(json);
           myChapter=json?.data[0];
         }
         //let myChapter = json[0];
@@ -270,7 +273,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
   const createBookmark = async() => {
     let bookmark = {
       bookId: bookId,
-      chapterId: id,
+      chapterId: bookmarkChapterId,
       chapterTitle: chapterTitle,
       positionY: currentY
     }

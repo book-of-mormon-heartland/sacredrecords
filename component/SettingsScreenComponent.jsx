@@ -38,12 +38,12 @@ const SettingsScreenComponent = ( {navigation} ) => {
 
   const deleteAccount = () => {
     console.log("delete account");
-    navigation.navigate('DeleteAccount', {});    
+    navigation.navigate('DeleteAccount', {});
   }
 
   const viewTermsOfUse = async() => {
     try {
-      await Linking.openURL('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/');
+      await Linking.openURL('https://sacred-records-node-prod-376185747738.us-central1.run.app/terms');
     } catch (err) {
       Alert.alert('Error', 'Unable to open terms of use page.');
     }
