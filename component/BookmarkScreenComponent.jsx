@@ -119,6 +119,7 @@ const BookmarksScreenComponent = ( {route} ) => {
 
   //let newEndpoint = apiEndpoint + "?parent=" + id;
   const fetchData = async () => {
+    console.log("in fetch data");
     const  apiEndpoint = serverUrl + "/bookmarks/getBookmarks"; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
     //let jwtToken = "";
@@ -127,12 +128,12 @@ const BookmarksScreenComponent = ( {route} ) => {
       setShowSignIn(false);
     } else {
       setShowSignIn(true);
+      setDisplaySignin(true);
+      setLoading(false);
     }
 
     if(!myJwtToken) {
       //we are not going to do anything except display a signin button.
-      setDisplaySignin(true);
-      setLoading(false);
     } else {
       setDisplaySignin(false);
       try {
@@ -212,19 +213,25 @@ const BookmarksScreenComponent = ( {route} ) => {
     } finally {
       setLoading(false);
     }
-
-
-
-
   } 
+
+ 
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchData();
-      return () => {
+      console.log("in use focus effect");
+      const loadData = async () => {
+        await fetchData();
       };
-    }, [jwtToken])
+      loadData();
+
+      return () => {
+        // cleanup logic
+      };
+    }, [jwtToken]) // Dependencies array
   );
+
+
 
   if (loading) {
     return (
@@ -246,13 +253,6 @@ const BookmarksScreenComponent = ( {route} ) => {
   if(showSignIn) {
     return (
       <View style={styles.container}>
-        <FlatList
-          data={data}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()} // Adjust keyExtractor based on your data structure        numColumns={2}
-          numColumns={1}
-          contentContainerStyle={styles.listContainer}
-        />
       </View>
     );    
   } else {

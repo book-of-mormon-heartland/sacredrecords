@@ -14,7 +14,7 @@ const QzChapterScreenComponent = ( {route} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const {  setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,6 +56,11 @@ const QzChapterScreenComponent = ( {route} ) => {
   const fetchData = async () => {
     const  apiEndpoint = serverUrl + "/chapters/qzchapters?parent=" + id; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
+    if(!myJwtToken) {
+       setData();
+       return;
+    }
+
     try {
       const response = await fetch(apiEndpoint, {
         method: 'GET',
@@ -100,18 +105,23 @@ const QzChapterScreenComponent = ( {route} ) => {
     }
   }
 
-  useFocusEffect(
-    React.useCallback(() => {
-      navigation.setOptions({
-          title: title,
-      });
 
-      fetchData();
-      return () => {
-      };
-    }, [])
-  );
 
+    useFocusEffect(
+      React.useCallback(() => {
+        const loadData = async () => {
+          navigation.setOptions({
+              title: title,
+          });
+          await fetchData();
+        };
+        loadData();
+        return () => {
+          // cleanup logic
+        };
+      }, [jwtToken]) // Dependencies array
+    );
+  
 
   if (loading) {
     return (

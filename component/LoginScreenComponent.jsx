@@ -135,6 +135,13 @@ const LoginScreenComponent = ( {route} ) => {
 
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>{translate('greeting')}</Text>
         <Image source={require('.././assets/sacred-records-logo-200x200.png')} style={styles.loginScreenImage} />
+        <TouchableOpacity style={styles.googleButton} onPress={() => signInToGoogle() }>
+          <Image
+            source={{ uri: 'https://storage.googleapis.com/sacred-records/google-sign-in.png'}} // Replace with your Google logo image path
+            style={styles.logo}
+          />
+          <Text style={styles.googleButtonText}>{translate('google_login')}(Testing)</Text>
+        </TouchableOpacity>
         <CognitoLoginScreenComponent />
         <Text style={styles.bottomText}>{translate("login_issue")}</Text>
       </View>

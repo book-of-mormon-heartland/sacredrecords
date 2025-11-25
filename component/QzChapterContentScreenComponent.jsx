@@ -16,7 +16,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
   const { language, setLanguage, translate } = useI18n();
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const {  setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
   //const { id } = route.params;
   const navigation = useNavigation();
   const isIOS = ( Platform.OS === 'ios' );
@@ -151,11 +151,17 @@ const QzChapterContentScreenComponent = ( {route}) => {
 
 
   useFocusEffect(
-    useCallback(() => {
+    React.useCallback(() => {
       const fetchDataAndScroll = async () => {
-        await fetchData(id);
-        if(fetchBookmark=="yes") {
-          await retrieveBookmark(bookId);
+        const myJwtToken = await retrieveJwtToken();
+        if(!myJwtToken) {
+          navigation.goBack();
+        }
+        if(myJwtToken) {
+          await fetchData(id);
+          if(fetchBookmark=="yes") {
+            await retrieveBookmark(bookId);
+          }
         }
       };
       fetchDataAndScroll(); // Call the async function immediately
@@ -165,6 +171,9 @@ const QzChapterContentScreenComponent = ( {route}) => {
       };
     }, []) // Added all dependencies
   );
+
+
+
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
@@ -226,11 +235,6 @@ const QzChapterContentScreenComponent = ( {route}) => {
 
   const onNextPage = async() => {
     console.log(followingChapter);
-
-
-
-
-    
     if(followingChapter != "") {
       handleChapterChange(followingChapter);
       if (scrollViewRef.current) {
@@ -347,7 +351,6 @@ const QzChapterContentScreenComponent = ( {route}) => {
     return renderedBoldParts;
   };
 
-
   return (
     <View style={styles.container}>
     <ScrollView 
@@ -417,7 +420,8 @@ const QzChapterContentScreenComponent = ( {route}) => {
         <Bookmark  stroke="black" fill="#fff" width={22} height={22}/>
       </TouchableOpacity>
     </View>
- );
+  );
+  
 };
 
 const styles = StyleSheet.create({

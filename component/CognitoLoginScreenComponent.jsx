@@ -14,7 +14,7 @@ const CognitoLoginScreenComponent = ( {route} ) => {
 
     const navigation = useNavigation();
     
-    const { cognitoSignIn } = useContext(AuthContext);
+    const {  googleSignIn, cognitoSignIn } = useContext(AuthContext);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -70,7 +70,7 @@ const CognitoLoginScreenComponent = ( {route} ) => {
 
     return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Login with Cognito</Text>
       
       <TextInput
         style={styles.input}
@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginTop: 20,
     marginBottom: 10,
     textAlign: 'center',
     color: '#333',

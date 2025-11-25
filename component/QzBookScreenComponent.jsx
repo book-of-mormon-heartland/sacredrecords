@@ -12,7 +12,7 @@ const QzBookScreenComponent = ( {route} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const { setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -50,7 +50,11 @@ const QzBookScreenComponent = ( {route} ) => {
   const fetchData = async () => {
     const  apiEndpoint = serverUrl + "/books/qzBook"; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
-    console.log("fetchData for book");
+    if(!myJwtToken) {
+       setData();
+       return;
+    }
+    //console.log("fetchData for book");
     
     let newEndpoint = apiEndpoint + "?bookid=" + id;
     try {
@@ -98,15 +102,20 @@ const QzBookScreenComponent = ( {route} ) => {
     }
   };
 
+
   useFocusEffect(
     React.useCallback(() => {
-      navigation.setOptions({
-          title: title,
-      });
-      fetchData();
-      return () => {
+      const loadData = async () => {
+        navigation.setOptions({
+            title: title,
+        });
+        await fetchData();
       };
-    }, [])
+      loadData();
+      return () => {
+        // cleanup logic
+      };
+    }, [jwtToken]) // Dependencies array
   );
 
 

@@ -201,8 +201,12 @@ export const AuthProvider = ({ children }) => {
                 
                 try {
                     //console.log(serverUrl + "/authentication/googleLogin");
-                    
-                    const postResponse = await fetch(serverUrl + "/authentication/googleLogin", {
+                    let url=serverUrl + "/authentication/googleLoginAndroid";
+                    if(isIOS) {
+                        url=serverUrl + "/authentication/googleLogin";
+                    }
+                    console.log(url);
+                    const postResponse = await fetch(url, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -211,12 +215,12 @@ export const AuthProvider = ({ children }) => {
                     });
                     if (!postResponse.ok) {
 
-                        //console.log("Response not ok");
+                        console.log("Response not ok");
                         throw new Error(`HTTP error! status: ${postResponse.status}`);
                     }
                     const responseData = await postResponse.json();
                     const obj = JSON.parse(responseData);
-                    //console.log(obj);
+                    console.log(obj);
 
                     if(obj?.language && (obj.language != "")) {
                         //console.log("Language from server: " + obj.language);
