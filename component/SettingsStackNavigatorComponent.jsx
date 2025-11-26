@@ -5,6 +5,7 @@ import EditProfileScreenComponent from './EditProfileScreenComponent';
 import DeleteProfileScreenComponent from './DeleteProfileScreenComponent';
 import DeleteAccountScreenComponent from './DeleteAccountScreenComponent';
 import CancelSubscriptionScreenComponent from './CancelSubscriptionScreenComponent';
+import ViewTermsScreenComponent from './ViewTermsScreenComponent';
 import LoginScreenComponent from './LoginScreenComponent';
 import { useNavigation, navigate } from '@react-navigation/native';
 import { ThemeContext } from '.././context/ThemeContext';
@@ -83,6 +84,18 @@ const SettingsStackNavigatorComponent = () => {
         }}
         component={CancelSubscriptionScreenComponent} />
 
+
+      <SettingsStack.Screen name="ViewTerms" 
+        options = {{
+          title: translate('terms_of_use_title'),
+          headerTitleAlign: 'center',
+          tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
+          tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
+          tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
+          tabBarShowLabel: true,
+        }}
+        component={ViewTermsScreenComponent} />
+
       <SettingsStack.Screen name="SignIn" 
         options = {{
           title: translate('sign_in'),
@@ -101,9 +114,3 @@ const SettingsStackNavigatorComponent = () => {
 
 export default SettingsStackNavigatorComponent;
 
-
-/*
-
-
-
-*/

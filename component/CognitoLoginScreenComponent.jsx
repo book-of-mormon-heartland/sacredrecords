@@ -3,6 +3,7 @@ import React, { useState, useContext } from 'react';
 import { View, TextInput, Button, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { AuthContext } from '.././context/AuthContext';
 import { useNavigation, navigate } from '@react-navigation/native';
+
 //import AccountVerificationScreenComponent from './AccountVerificationScreenComponent.jsx';
 import { Eye, EyeOff } from "react-native-feather";
 
@@ -12,7 +13,7 @@ import { Eye, EyeOff } from "react-native-feather";
 
 const CognitoLoginScreenComponent = ( {route} ) => {
 
-    const navigation = useNavigation();
+    const navigation = useNavigation(); 
     
     const {  googleSignIn, cognitoSignIn } = useContext(AuthContext);
     const [username, setUsername] = useState('');
@@ -42,7 +43,8 @@ const CognitoLoginScreenComponent = ( {route} ) => {
     const handleLogin = async () => {
         try {
             const tokens = await cognitoSignIn(username, password);
-            setMessage("Welcome Back " + tokens.username + "!\nYou are being redirected...");
+            setMessage("Welcome Back! \n You are being redirected...");
+            navigation.goBack();
 
         } catch (err) {
             setMessage(err.message || JSON.stringify(err));

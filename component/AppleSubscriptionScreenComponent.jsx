@@ -94,6 +94,11 @@ const AppleSubscriptionScreenComponent = ({route}) => {
             setMessage(response.message);
             console.log("response");
             console.log(response);
+            setMessage(response.success);
+              //success: true,
+              //environment: validationResult.environment,
+              //receipt: validationResult.data,
+
             if(response.message=="success") {
               await RNIap.finishTransaction(purchase);
             }

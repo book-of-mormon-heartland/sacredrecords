@@ -42,11 +42,14 @@ const SettingsScreenComponent = ( {navigation} ) => {
   }
 
   const viewTermsOfUse = async() => {
+    navigation.navigate('ViewTerms', {});    
+/*
     try {
       await Linking.openURL('https://sacred-records-node-prod-376185747738.us-central1.run.app/terms');
     } catch (err) {
       Alert.alert('Error', 'Unable to open terms of use page.');
     }
+      */
   }
 
   const viewPrivacyPolicy = async() => {
