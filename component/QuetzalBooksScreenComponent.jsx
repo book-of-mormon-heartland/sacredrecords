@@ -298,8 +298,8 @@ const QuetzalBookScreenComponent = ( {route} ) => {
       } else {
         const responseData = await response.json();
         const obj = JSON.parse(responseData);
-        console.log("checking if subscribed");
-        console.log(obj);
+        //console.log("checking if subscribed");
+        //console.log(obj);
         return obj;
       }
     } catch (error) {
@@ -483,14 +483,27 @@ const QuetzalBookScreenComponent = ( {route} ) => {
   const renderDummyItem = ({ item }) => {
     return(
       <View style={styles.container}>
-        <TouchableOpacity >
+        <TouchableOpacity  onPress={() => subscribe()}>
         <Image source={{ uri: item.thumbnail }} style={styles.image} />
         </TouchableOpacity>
-        <Text style={styles.text}>{item.thumbnailTitle}</Text>
-        <Text style={styles.redText}>{translate("subscribe_to_view")}</Text>
+        <Text style={styles.text}  onPress={() => subscribe()}>{item.thumbnailTitle}</Text>
+        <Text style={styles.redText} onPress={() => subscribe()}>{translate("subscribe_to_view")}</Text>
       </View>
     );
   }
+
+  const renderDummyItemSignIn = ({ item }) => {
+    return(
+      <View style={styles.container}>
+        <TouchableOpacity onPress={() => signInToApp()}>
+          <Image source={{ uri: item.thumbnail }} style={styles.image} />
+        </TouchableOpacity>
+        <Text style={styles.text}  onPress={() => signInToApp()}>{item.thumbnailTitle}</Text>
+        <Text style={styles.redText} onPress={() => signInToApp()} >{translate("sign_in_to_access")}</Text>
+      </View>
+    );
+  }
+
 
 
   if (loading) {
@@ -525,7 +538,7 @@ const QuetzalBookScreenComponent = ( {route} ) => {
           </View>
           <FlatList
             data={data}
-            renderItem={renderDummyItem}
+            renderItem={renderDummyItemSignIn}
             keyExtractor={(item, index) => index.toString()} // Adjust keyExtractor based on your data structure        numColumns={2}
             numColumns={3}
             contentContainerStyle={styles.listContainer}

@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+apply plugin: "com.google.gms.google-services"
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -82,8 +83,8 @@ android {
         applicationId "com.sacredrecords"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21
-        versionName "1.21"
+        versionCode 25
+        versionName "1.25"
     }
     signingConfigs {
         debug {
@@ -109,7 +110,7 @@ android {
             // Apply the signing config
             signingConfig signingConfigs.release
             // OPTIONAL: Enable Proguard to shrink and obfuscate the code
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             // Note: If you have assets (like images or fonts), ensure the bundle logic is correct.
             // React Native often handles this automatically with a default configuration.
@@ -120,6 +121,8 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    // add for firebasde
+    implementation platform('com.google.firebase:firebase-bom:34.6.0')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
@@ -127,3 +130,5 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+

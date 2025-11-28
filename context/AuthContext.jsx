@@ -200,7 +200,7 @@ export const AuthProvider = ({ children }) => {
                 // from here we make calls to server to authenticate to the rest server.
                 
                 try {
-                    //console.log(serverUrl + "/authentication/googleLogin");
+                    console.log(serverUrl + "/authentication/googleLogin");
                     let url=serverUrl + "/authentication/googleLoginAndroid";
                     if(isIOS) {
                         url=serverUrl + "/authentication/googleLogin";

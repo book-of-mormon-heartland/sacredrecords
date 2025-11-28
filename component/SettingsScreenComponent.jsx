@@ -24,7 +24,7 @@ const SettingsScreenComponent = ( {navigation} ) => {
   const { language, setLanguage, translate } = useI18n();
   let serverUrl = Environment.NODE_SERVER_URL;
   if(isIOS) {
-      serverUrl = Environment.IOS_NODE_SERVER_URL;
+    serverUrl = Environment.IOS_NODE_SERVER_URL;
   }
 
   const updateProfile = () => {
@@ -41,16 +41,35 @@ const SettingsScreenComponent = ( {navigation} ) => {
     navigation.navigate('DeleteAccount', {});
   }
 
-  const viewTermsOfUse = async() => {
-    navigation.navigate('ViewTerms', {});    
-/*
+  const viewTermsOfUseInApp = async() => {
+    navigation.navigate('ViewTerms', {});
+  }
+
+  const viewTermsOfUseAppServer = async() => {
     try {
-      await Linking.openURL('https://sacred-records-node-prod-376185747738.us-central1.run.app/terms');
+      await Linking.openURL("https://sacred-records-node-prod-376185747738.us-central1.run.app/terms");
     } catch (err) {
       Alert.alert('Error', 'Unable to open terms of use page.');
     }
-      */
   }
+
+  const viewTermsOfUseTrisummitServer = async() => {
+    try {
+      await Linking.openURL("https://trisummit.io/sacred-records-terms-of-use/");
+    } catch (err) {
+      Alert.alert('Error', 'Unable to open terms of use page.');
+    }
+  }
+
+
+  const viewTermsOfUseAppleServer = async() => {
+    try {
+      await Linking.openURL("");
+    } catch (err) {
+      Alert.alert('Error', 'Unable to open terms of use page.');
+    }
+  }
+
 
   const viewPrivacyPolicy = async() => {
     try {
@@ -301,11 +320,20 @@ const SettingsScreenComponent = ( {navigation} ) => {
       
       <>
       <View  style={styles.container}>
-          <Text style={styles.settingTitle}>{translate('terms_of_use_title')}</Text>
-          <Text style={styles.text}>{translate('terms_of_use_text')}</Text>
-          <TouchableOpacity style={styles.googleButton} onPress={() => viewTermsOfUse() }>
-            <Text style={styles.googleButtonText}>{translate('terms_of_use_button_text')}</Text>
-          </TouchableOpacity>
+        <Text style={styles.settingTitle}>{translate('terms_of_use_title')}</Text>
+        <Text style={styles.textRed}>{translate('terms_of_use_text_trial')}</Text>
+        <Text style={styles.text}>{translate('terms_of_use_text')}</Text>
+        <TouchableOpacity style={styles.googleButton} onPress={() => viewTermsOfUseInApp()}>
+          <Text style={styles.googleButtonText}>{translate('terms_of_use_button_text')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.googleButton} onPress={() =>viewTermsOfUseAppServer()}>
+          <Text style={styles.googleButtonText}>{translate('terms_of_use_button_text_server')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.googleButton} onPress={() => viewTermsOfUseTrisummitServer()}>
+          <Text style={styles.googleButtonText}>{translate('terms_of_use_button_text_trisummit')}</Text>
+        </TouchableOpacity>
       </View>
       </>
       <>
@@ -333,7 +361,7 @@ const SettingsScreenComponent = ( {navigation} ) => {
 
       <>
       <View  style={styles.container}>
-          <Text style={styles.settingTitle}>{translate('beta_testing')}</Text>
+          <Text style={styles.settingTitle}>{translate('support')}</Text>
           <Text style={styles.text}>{translate('beta_testing_text')}</Text>
       </View>
       </>
@@ -365,7 +393,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   text: {
-    fontSize: 14,
+    fontSize: 12,
+  },
+  textRed: {
+    color: "#ff0000",
+    fontSize: 12,
   },
   centeredText: {
     fontSize: 14,
@@ -423,6 +455,37 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     color: '#ffffff', // Google's gray text color
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  termsButton: {
+    flex: 1,
+    backgroundColor: '#4285F4',
+    paddingVertical: 10,
+    marginHorizontal: 5,   // spacing between the buttons
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007bff', // White background for the button
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#E0E0E0', // Light gray border
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2, // For Android shadow
+  },
+
+  termsButtonText: {
+    color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
   },

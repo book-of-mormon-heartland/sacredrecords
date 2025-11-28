@@ -4,10 +4,12 @@ import * as RNIap from 'react-native-iap';
 import { useI18n } from '.././context/I18nContext'; 
 var Environment = require('.././context/environment.ts');
 import { useNavigation, navigate } from '@react-navigation/native';
+import { initIAP, connection } from './context/iapService.js';
 
 
 
-const subSkus = ['sacred-records-monthly-subscription'];
+
+const subscriptionSkus = ['sacred_records_monthly_subscription'];
 const errorLog = ({message, error}) => {
   console.error('An error happened', message, error);
 };
@@ -16,7 +18,7 @@ const isIos = Platform.OS === 'ios';
 
 
 const AppleSubscriptionScreenComponent = ({route}) => {
-  //const { connected, subscriptions, currentPurchase } = useIAP();
+  //const { connection } = useIAP();
   const [loading, setLoading] = useState(false);
   const [subscriptions, setSubscriptions] = useState();
   const { language, setLanguage, translate } = useI18n();
@@ -28,11 +30,16 @@ const AppleSubscriptionScreenComponent = ({route}) => {
       serverUrl = Environment.IOS_NODE_SERVER_URL;
   }
   
-  const subscriptionSkus = ['sacred_records_monthly_subscription'];
 
   const getProducts = async () => {
     try {
-      const products = await RNIap.getSubscriptions(subscriptionSkus);
+
+      //initIAP()
+      const hasActiveSubscriptions = await RNIap.hasActiveSubscriptions();
+      console.log("hasActiveSubscriptions");
+      console.log(hasActiveSubscriptions);
+
+      const products = await RNIap.getActiveSubscriptions();
       console.log('Available subscriptions', products);
       setSubscriptions(products);
       console.log(subscriptions);
@@ -115,65 +122,41 @@ const AppleSubscriptionScreenComponent = ({route}) => {
 
 
   useEffect( () => {
+    
     const initIAP = async () => {
       try {
-        const result = await RNIap.initConnection();
+
+        //const result = await RNIap.initConnection();
         //console.log('IAP Connection', result);
+        //console.log("connection in iapServices");
+        //console.log(connection);
+        console.log(RNIap);
+        try{  
+          const subscriptions = await RNIap.getActiveSubscriptions();
+          console.log("active subscriptions");
+          console.log(subscriptions);
+        } catch(e){ 
+          console.log(e); 
+          console.log("error in getActiveSubscriptions");
+        }  
+        try{  
+          //const products = await RNIap.fetchProducts();
+          //console.log("products");
+          //console.log(products);
+        } catch(e){ 
+          console.log(e); 
+          console.log("error in fetchProducts");
+        }  
         //await RNIap.flushFailedPurchasesCachedAsPendingAndroid(); // safe on iOS too
       } catch (err) {
         //console.warn('IAP connection error', err);
       }
     };
+    
     initIAP();
     getProducts();
   }, []);
   
-  /*
-  const getInformation = async() => {
-    try {
-      let activeSubscriptions;
-      let products;
-      console.log("RNIap");
-      console.log(RNIap);
-      try {
-        products = await RNIap.fetchProducts({ skus: subSkus} );
-      } catch (err) {
-        console.log("fetchProducts error");
-        console.log(err);
-      }
-      console.log("products");
-      console.log(products);
-      */
-      //try {
-      //  activeSubscriptions = await RNIap.getActiveSubscriptions({ skus: subSkus} );
-      //} catch (err) {
-      //  console.log("activeSubscriptions error");
-      //  console.log(err)
-     // }
-      //console.log("activeSubscriptions");
-      //console.log(activeSubscriptions);
-      /*
-      await RNIap.requestSubscription({ sku: productId });
-      const activeSubscriptions = await RNIap.getActiveSubscriptions({ skus: subSkus} );
-      console.log("activeSubscriptions");
-      console.log(activeSubscriptions);
-      const activeSubscriptions = await RNIap.getActiveSubscriptions({ skus: subSkus} );
-      console.log("activeSubscriptions");
-      console.log(activeSubscriptions);
-      const activeSubscriptions = await RNIap.getActiveSubscriptions({ skus: subSkus} );
-      console.log("activeSubscriptions");
-      console.log(activeSubscriptions);
-      const activeSubscriptions = await RNIap.getActiveSubscriptions({ skus: subSkus} );
-      console.log("activeSubscriptions");
-      console.log(activeSubscriptions);
-      */
-     /*
-      // Update your UI with product information
-    } catch (error) {
-      console.warn('Error fetching subscriptions:', error);
-    }
-  }
-    */
 
 
   return (
