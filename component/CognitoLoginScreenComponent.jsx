@@ -72,7 +72,7 @@ const CognitoLoginScreenComponent = ( {route} ) => {
 
     return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login with Cognito</Text>
+      <Text style={styles.title}>Sign in with Cognito</Text>
       
       <TextInput
         style={styles.input}

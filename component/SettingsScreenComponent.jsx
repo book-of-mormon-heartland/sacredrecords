@@ -317,12 +317,13 @@ const SettingsScreenComponent = ( {navigation} ) => {
   ) : (  
      <></>
   )}
-      
+      { isIOS ? (
       <>
       <View  style={styles.container}>
         <Text style={styles.settingTitle}>{translate('terms_of_use_title')}</Text>
         <Text style={styles.textRed}>{translate('terms_of_use_text_trial')}</Text>
         <Text style={styles.text}>{translate('terms_of_use_text')}</Text>
+        
         <TouchableOpacity style={styles.googleButton} onPress={() => viewTermsOfUseInApp()}>
           <Text style={styles.googleButtonText}>{translate('terms_of_use_button_text')}</Text>
         </TouchableOpacity>
@@ -336,6 +337,9 @@ const SettingsScreenComponent = ( {navigation} ) => {
         </TouchableOpacity>
       </View>
       </>
+      ) : (
+        <></>
+      )}
       <>
       <View  style={styles.container}>
           <Text style={styles.settingTitle}>{translate('privacy_policy_title')}</Text>

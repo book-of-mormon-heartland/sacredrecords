@@ -30,8 +30,8 @@ function getEnvironment() {
     // This value is defined in the .env file.  
     var platform = process.env.ENVIRONMENT;
     //console.log("platform");
-    console.log(platform);
-    platform="development";
+    //console.log(platform);
+    platform="production";
     //platform="production";
     //console.log(platform);
     // ...now return the correct environment

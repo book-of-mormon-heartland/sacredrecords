@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
                 service: 'com.sacredrecords.jwt', // your unique key
             }
             );
-            console.log('JWT token saved successfully!');
+           // console.log('JWT token saved successfully!');
         } catch (error) {
             console.error('Error saving JWT token:', error);
         }
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }) => {
                 service: 'com.sacredrecords.refresh', // your unique key
             }
             );
-            console.log('JWT token saved successfully!');
+            //console.log('JWT token saved successfully!');
         } catch (error) {
             console.error('Error saving JWT token:', error);
         }
@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
 
 
     const refreshJwtToken = async () => {
-        console.log("in refreshJwtToken");
+       //console.log("in refreshJwtToken");
         try {
             const postResponse = await fetch(serverUrl + "/authentication/refreshJwtToken", {
                 method: 'POST',
@@ -186,26 +186,26 @@ export const AuthProvider = ({ children }) => {
 
 
     const googleSignIn = async () => {
-        console.log("googleSignIn");
+        //console.log("googleSignIn");
        try {
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-            console.log("play services passed")
+            //console.log("play services passed")
             const response = await GoogleSignin.signIn();
-            console.log(response);
+            //console.log(response);
             if(isSuccessResponse(response)){
-                console.log("Google Sign-In Success: ", response.data );
+                //console.log("Google Sign-In Success: ", response.data );
                 let user = response.data.user;
                 let idToken = response.data.idToken;
 
                 // from here we make calls to server to authenticate to the rest server.
                 
                 try {
-                    console.log(serverUrl + "/authentication/googleLogin");
+                    //console.log(serverUrl + "/authentication/googleLogin");
                     let url=serverUrl + "/authentication/googleLoginAndroid";
                     if(isIOS) {
                         url=serverUrl + "/authentication/googleLogin";
                     }
-                    console.log(url);
+                    //console.log(url);
                     const postResponse = await fetch(url, {
                         method: 'POST',
                         headers: {
@@ -215,12 +215,12 @@ export const AuthProvider = ({ children }) => {
                     });
                     if (!postResponse.ok) {
 
-                        console.log("Response not ok");
+                        //console.log("Response not ok");
                         throw new Error(`HTTP error! status: ${postResponse.status}`);
                     }
                     const responseData = await postResponse.json();
                     const obj = JSON.parse(responseData);
-                    console.log(obj);
+                    //console.log(obj);
 
                     if(obj?.language && (obj.language != "")) {
                         //console.log("Language from server: " + obj.language);
@@ -228,8 +228,8 @@ export const AuthProvider = ({ children }) => {
                     }
 
                     if(obj?.jwtToken) {
-                        console.log("Next is the signIn jwt token value");
-                        console.log(obj.jwtToken);
+                        //console.log("Next is the signIn jwt token value");
+                        //console.log(obj.jwtToken);
                         setJwtToken(obj.jwtToken || "");
                         setRefreshToken(obj.refreshToken || "");
                         setMessage("Logged In Successfully");
@@ -242,11 +242,11 @@ export const AuthProvider = ({ children }) => {
                         return "true";
 
                     } else {
-                        console.log("No JWT Token returned from server.");
+                        //console.log("No JWT Token returned from server.");
                     }
                 } catch (error) {
-                    console.log("We got some error here.")
-                    console.error('Error:', error);
+                    //console.log("We got some error here.")
+                    //console.error('Error:', error);
                     return "false";
                 }
             } else {
@@ -323,12 +323,12 @@ export const AuthProvider = ({ children }) => {
 
             // need to do GoogleSignin.disconnect also.
         } catch (error) {
-            console.log('Google Sign-Out Error: ', error);
+            //console.log('Google Sign-Out Error: ', error);
         }
     }
 
     const appleSignIn = async (response, userData) => {
-        console.log("appleSignIn");
+        //console.log("appleSignIn");
         //let fullName = userData?.fullName?.givenName + " " + userData?.fullName?.familyName || "";
         //let givenName = userData?.fullName?.givenName || "";
         //let familyName = userData?.fullName?.familyName || "";
@@ -361,13 +361,13 @@ export const AuthProvider = ({ children }) => {
             });
 
             if (!postResponse.ok) {
-                console.log("error on server side - Status is: ");
+                //console.log("error on server side - Status is: ");
                 //console.log(postResponse.status);
                 return postResponse.status;
             }
             const responseData = await postResponse.json();
-            console.log("responseData");
-            console.log(responseData);
+            //console.log("responseData");
+            //console.log(responseData);
             //console.log(responseData.language);
             //const obj = JSON.parse(responseData);
             //console.log("obj");
@@ -386,8 +386,8 @@ export const AuthProvider = ({ children }) => {
                 await saveRefreshToken(responseData.refreshToken);
                 setMessage(responseData.message);
             } else if(responseData.message!="updateProfile") {
-                console.log("this is the responseData.user");
-                console.log(responseData.user);
+                //console.log("this is the responseData.user");
+                //console.log(responseData.user);
                 //setUserProfile(responseData.user);
                 setJwtToken(responseData.jwtToken || "");
                 setRefreshToken(responseData.refreshToken || "");
@@ -430,7 +430,7 @@ export const AuthProvider = ({ children }) => {
         
         const user = new CognitoUser({ Username, Pool: userPool });
         const authDetails = new AuthenticationDetails({ Username, Password });
-        console.log(user);
+        //console.log(user);
 
         const authenticatedUser = await new Promise((resolve, reject) => {
             user.authenticateUser(authDetails, {
@@ -443,15 +443,15 @@ export const AuthProvider = ({ children }) => {
                     //console.log(user);
                 },
                 onFailure: (err) => {
-                    console.log("Failed to login");
+                    //console.log("Failed to login");
                     reject(err);
                 } ,
                 });
             });
         
         // here we go to the server.  If we got here, the sign in was successful.
-        console.log("Authenticated User:");
-        console.log(authenticatedUser.idToken);
+       // console.log("Authenticated User:");
+       // console.log(authenticatedUser.idToken);
         try {
             const postResponse = await fetch(serverUrl + "/authentication/cognitoLogin", {
                 method: 'POST',
@@ -462,7 +462,7 @@ export const AuthProvider = ({ children }) => {
             });
             if (!postResponse.ok) {
 
-                console.log("Response not ok");
+                //console.log("Response not ok");
                 throw new Error(`HTTP error! status: ${postResponse.status}`);
             }
             const responseData = await postResponse.json();
@@ -484,7 +484,7 @@ export const AuthProvider = ({ children }) => {
                 setTemporaryRefreshToken("");
                 return "true";
             } else {
-                console.log("No JWT Token returned from server.");
+                //console.log("No JWT Token returned from server.");
                 setJwtToken("");
                 setRefreshToken("");
                 setMessage("Not Logged In");
@@ -497,8 +497,8 @@ export const AuthProvider = ({ children }) => {
             }
             
         } catch (error) {
-            console.log("We got some error here.")
-            console.error('Error:', error);
+           // console.log("We got some error here.")
+           // console.error('Error:', error);
             return "false";
         }
         return user;
@@ -548,7 +548,7 @@ export const AuthProvider = ({ children }) => {
           });
           if (!postResponse.ok) {
 
-              console.log("Response not ok");cs
+              //console.log("Response not ok");cs
               //throw new Error(`HTTP error! status: ${postResponse.status}`);
           }
           const responseData = await postResponse.json();
