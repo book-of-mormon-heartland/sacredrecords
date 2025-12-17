@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Alert, Button } from 'react-native';
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
@@ -9,6 +9,7 @@ import { AppleButton, appleAuth } from '@invertase/react-native-apple-authentica
 import { useNavigation, navigate } from '@react-navigation/native';
 import CognitoLoginScreenComponent from './CognitoLoginScreenComponent.jsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
 
 
 
@@ -28,7 +29,41 @@ const LoginScreenComponent = ( {route} ) => {
   useEffect(() => {
   }, []); 
 
+  const loginWithFacebook = async () => {
+    let result;
+    try {
+      // open Facebook login dialog
+      result = await LoginManager.logInWithPermissions([
+        'public_profile',
+        'email'
+      ]);
 
+      if (result?.isCancelled) {
+        Alert.alert('Login cancelled');
+        return;
+      }
+
+      // get access token
+      const data = await AccessToken.getCurrentAccessToken();
+
+      if (!data) {
+        Alert.alert('Something went wrong obtaining access token');
+        return;
+      }
+
+      const fbAccessToken = data.accessToken.toString();
+
+      // 👉 send this token to your backend
+      // your backend exchanges it with Facebook for user profile info
+      
+      console.log('Facebook Access Token:', fbAccessToken);
+
+      Alert.alert('Logged in with Facebook!');
+    } catch (error) {
+      console.log('Facebook Login Error', error);
+      Alert.alert('Login error');
+    }
+  };
 
   async function onAppleButtonPress() {
     try {
@@ -113,7 +148,6 @@ const LoginScreenComponent = ( {route} ) => {
       <View style={styles.loginContainer}>
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>{translate('greeting')}</Text>
         <Image source={require('.././assets/sacred-records-logo-200x200.png')} style={styles.loginScreenImage} />
- 
         <TouchableOpacity style={styles.googleButton} onPress={() => signInToGoogle() }>
           <Image
             source={{ uri: 'https://storage.googleapis.com/sacred-records/google-sign-in.png'}} // Replace with your Google logo image path
@@ -140,13 +174,7 @@ const LoginScreenComponent = ( {route} ) => {
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>{translate('greeting')}</Text>
         <Image source={require('.././assets/sacred-records-logo-200x200.png')} style={styles.loginScreenImage} />
 
-        <TouchableOpacity style={styles.googleButton} onPress={() => signInToGoogle() }>
-          <Image
-            source={{ uri: 'https://storage.googleapis.com/sacred-records/google-sign-in.png'}} // Replace with your Google logo image path
-            style={styles.logo}
-          />
-          <Text style={styles.googleButtonText}>{translate('google_login')}</Text>
-        </TouchableOpacity>
+       
         <CognitoLoginScreenComponent />
         <Text style={styles.bottomText}>{translate("login_issue")}</Text>
       </View>
@@ -163,7 +191,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     margin: 10,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
   title: {
@@ -175,8 +203,12 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   loginScreenImage: {
-    padding: 20,
-    margin: 20,
+    paddingTop:0,
+    paddingBottom: 0,
+    marginTop: 0,
+    marginBottom: 0,
+    width: 100,
+    height: 100,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -230,8 +262,8 @@ const styles = StyleSheet.create({
     height: 44,
   },
   logo: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     marginRight: 10,
   },
   googleButton: {
@@ -284,4 +316,24 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreenComponent;
+
+
+
+/*
+<Button title="Login with Facebook" onPress={loginWithFacebook} />
+
+Facebook
+App Id: 1680843936658382
+App Secret: f14f411122863c36c1c084d1ff30295e
+
+
+        <TouchableOpacity style={styles.googleButton} onPress={() => signInToGoogle() }>
+          <Image
+            source={{ uri: 'https://storage.googleapis.com/sacred-records/google-sign-in.png'}} 
+            style={styles.logo}
+          />
+          <Text style={styles.googleButtonText}>{translate('google_login')}(Testing)</Text>
+        </TouchableOpacity>
+
+*/
 

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">sacredrecords</string>
+    <string name="facebook_app_id">1680843936658382</string>
+    <string name="fb_login_protocol_scheme">f14f411122863c36c1c084d1ff30295e</string>
 </resources>

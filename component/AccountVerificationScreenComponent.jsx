@@ -47,7 +47,7 @@ const AccountVerificationScreenComponent = ( {route} ) => {
             const resultValue = await cognitoVerifyAccount(username, value);
             console.log(resultValue);
             if(resultValue.message === "Success" ) {
-                navigation.navigate('Tabs');
+                navigation.goBack();
             } else {
                setMessage(resultValue.message);
             }

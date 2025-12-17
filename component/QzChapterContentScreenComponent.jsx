@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useContext, useEffect, useState, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Animated, Image, TouchableOpacity, Alert,  ActivityIndicator } from 'react-native';
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
@@ -8,15 +8,17 @@ import { useNavigation, navigate } from '@react-navigation/native';
 import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
 import { ArrowRight, ArrowLeft, Bookmark } from "react-native-feather";
 import { useI18n } from '.././context/I18nContext'; 
+import { RevenueCatContext } from '.././context/RevenueCatContext';
 
- 
+
 
 const QzChapterContentScreenComponent = ( {route}) => {
 
   const { language, setLanguage, translate } = useI18n();
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const { checkIfSubscribed  } = useContext(RevenueCatContext);
+  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, checkIfStripeSubscribed } = useContext(AuthContext);
   //const { id } = route.params;
   const navigation = useNavigation();
   const isIOS = ( Platform.OS === 'ios' );
@@ -26,7 +28,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
   }
   const { id, title, positionX, positionY, fetchBookmark, bookId } = route.params;
   const [chapterData, setChapterData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const [paragraphs, setParagraphs] = useState([]);
   const [chapterSubtitle, setChapterSubtitle] = useState("");
@@ -39,17 +41,73 @@ const QzChapterContentScreenComponent = ( {route}) => {
   const scrollViewRef = useRef(null);
   const [bookmarkChapterId, setBookmarkChapterId] = useState("");
   
-
-
-
+  
 
   const fetchData = async (id) => {
-    const  apiEndpoint = serverUrl + "/chapters/qzChapterContentText"; // Example endpoint
+    console.log("fetch data for qzChapterContentScreenComponent");
+    //setLoading(true);
+
+    let apiEndpoint = serverUrl + "/chapters/qzChapterContentText"; // Example endpoint
+    if(isIOS) {
+      apiEndpoint = serverUrl + "/chapters/appleQzChapterContentText";
+    } else if(isSubscribed) {
+      apiEndpoint = serverUrl + "/chapters/androidQzChapterContentText";
+    }
+
+    //let apiEndpoint = serverUrl + "/books/qzBook"; // Example endpoint
+    const isSubscribed = await checkIfSubscribed();
     const myJwtToken = await retrieveJwtToken();
+
+    if(isIOS){
+      if(isSubscribed){
+        apiEndpoint = serverUrl + "/chapters/appleQzChapterContentText";
+      } else {
+        setData();
+        setLoading(false);
+        navigation.navigate('QuetzalBookshelf', {
+          id: id,
+          title: title,
+        });
+        return;
+      }
+    }
+    if(!isIOS){
+      if(isSubscribed){
+        apiEndpoint = serverUrl + "/chapters/androidQzChapterContentText";
+      } else {
+        if(!myJwtToken) {
+          
+          //setData();
+          navigation.navigate('QuetzalBookshelf');
+
+          setLoading(false);
+          return;
+        } else {
+          // logged in, check if stripe subscribed.
+          //apiEndpoint = serverUrl + "chapters/qzChapterContentText"; 
+          let returned = await checkIfStripeSubscribed();
+          console.log("logged in isStripeSubscribed");
+          console.log(returned);
+          if(returned) {
+            apiEndpoint = serverUrl + "/chapters/qzChapterContentText"; // Example endpoint
+          } else {
+            setData();
+            navigation.navigate('QuetzalBookshelf', {
+              id: id,
+              title: title,
+            });
+            setLoading(false);
+            return;
+          }
+        }
+      }
+    }
+    
+
     setBookmarkChapterId(id);
 
-    setIsLoading(true);
     let newEndpoint = apiEndpoint + "?id=" + id;
+    console.log(newEndpoint);
     try {
       const response = await fetch(newEndpoint, {
         method: 'GET',
@@ -58,15 +116,9 @@ const QzChapterContentScreenComponent = ( {route}) => {
         }
       });
       if (!response.ok) {
-        console.log("not okay");
         if(response.status === 500) {
-          console.log("500");
-          console.log("tokenRefreshObject before");
           const tokenRefreshObj = await refreshJwtToken();
-          console.log("tokenRefreshObject after");
-          console.log(tokenRefreshObj);
           if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
-            console.log("Token refresh valid token");
             setJwtToken(tokenRefreshObj.jwtToken);
             await saveJwtToken(tokenRefreshObj.jwtToken);
             fetchData()
@@ -77,17 +129,13 @@ const QzChapterContentScreenComponent = ( {route}) => {
           }
         }
       } else {
-        //console.log("We got a response");
         const json = await response.json();
-        //console.log(json);
+        console.log("json from QzChapterContentScreenComponent");
+        console.log(json);
         let myChapter = {};
         if(json?.message=="success") {
-          //console.log("we got a success");
-          //console.log(json);
           myChapter=json?.data[0];
         }
-        //let myChapter = json[0];
-        //setBookId(myChapter.parent); // only needed for bookmarks
         setChapterData(myChapter);
         setParagraphs(myChapter.content);
         setChapterTitle(myChapter.title);
@@ -97,19 +145,16 @@ const QzChapterContentScreenComponent = ( {route}) => {
         navigation.setOptions({
           title: title,
         });
-        
       }
     } catch (error) {
-      console.log("Error in qzChapterContentScreenComponent");
-      console.log(error);
-      setError(error);
+      console.log("error getting content");
+      //setError(error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
 
-  
   const retrieveBookmark = async () => {
     const  bookmarkEndpoint = serverUrl + "/bookmarks/getBookmark?bookId=" + bookId; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
@@ -153,15 +198,9 @@ const QzChapterContentScreenComponent = ( {route}) => {
   useFocusEffect(
     React.useCallback(() => {
       const fetchDataAndScroll = async () => {
-        const myJwtToken = await retrieveJwtToken();
-        if(!myJwtToken) {
-          navigation.goBack();
-        }
-        if(myJwtToken) {
-          await fetchData(id);
-          if(fetchBookmark=="yes") {
-            await retrieveBookmark(bookId);
-          }
+        await fetchData(id);
+        if(fetchBookmark=="yes") {
+          await retrieveBookmark(bookId);
         }
       };
       fetchDataAndScroll(); // Call the async function immediately
@@ -172,7 +211,9 @@ const QzChapterContentScreenComponent = ( {route}) => {
     }, []) // Added all dependencies
   );
 
-
+  const signInToApp = () => {
+    navigation.navigate('SignIn');
+  }
 
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -244,7 +285,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
       console.log("No followup Chapter");
       const toRemove = await removeBookmark();
       console.log(toRemove);
-      Alert.alert("Congratulations, you have completed the book. Your bookmark is being removed.");
+      Alert.alert("Congratulations, you have completed the book.");
     }
   }
 
@@ -275,6 +316,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
   }
 
   const createBookmark = async() => {
+    console.log("Attempting to create a bookmark");
     let bookmark = {
       bookId: bookId,
       chapterId: bookmarkChapterId,
@@ -295,6 +337,8 @@ const QzChapterContentScreenComponent = ( {route}) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const createdBookmark = await response.json();
+      console.log("createdBookmark");
+      console.log(createdBookmark);
       // navigate to the Bookshelf
 
     } catch (err) {
@@ -351,8 +395,26 @@ const QzChapterContentScreenComponent = ( {route}) => {
     return renderedBoldParts;
   };
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading data...</Text>
+      </View>
+    );
+  }
+
+
   return (
     <View style={styles.container}>
+       {jwtToken ? (
+                 <></>
+              ) : (
+                // 👇 Render when not signed in
+                <TouchableOpacity onPress={() => signInToApp()}>
+                  <Text style={styles.signInButtonText}>{translate('sign_in_for_bookmarks')}</Text>
+                </TouchableOpacity>
+              )}
     <ScrollView 
       style={styles.container} 
       ref={scrollViewRef}
@@ -412,6 +474,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    {jwtToken? (
       <TouchableOpacity
         style={styles.floatingButton}
         onPress={() => createBookmark()}
@@ -419,6 +482,10 @@ const QzChapterContentScreenComponent = ( {route}) => {
       >
         <Bookmark  stroke="black" fill="#fff" width={22} height={22}/>
       </TouchableOpacity>
+    )
+    :
+    (<></>)
+      }
     </View>
   );
   
@@ -505,6 +572,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
   },
+  signInButtonText: {
+    alignSelf: 'flex-end' 
+  }
 });
 
 export default QzChapterContentScreenComponent;

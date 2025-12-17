@@ -1,10 +1,9 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, useWindowDimensions, Platform } from 'react-native';
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
-import { Platform } from 'react-native';
 import { useNavigation, navigate } from '@react-navigation/native';
 import { ChevronRight } from "react-native-feather";
 
@@ -26,6 +25,9 @@ const ChapterScreenComponent = ( {route} ) => {
   if(isIOS) {
       serverUrl = Environment.IOS_NODE_SERVER_URL;
   }
+  const { width } = useWindowDimensions();
+  const listWidth = width*0.9;
+  
 
 
 
@@ -101,6 +103,47 @@ const ChapterScreenComponent = ( {route} ) => {
     }, [])
   );
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      color: "#000",
+      padding: 10,
+      borderRadius: 8,
+      margin: 10,
+      paddingBottom: 0,
+      paddingTop: 10,
+      marginBottom: 10,
+      justifyContent: 'top',
+      alignItems: 'center',
+    },
+    listContainer: {
+      width: listWidth,
+      padding: 10,
+    },
+    listItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#f9f9f9',
+      padding: 5,
+      marginVertical: 5,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: '#ddd',
+    },
+    textContainer: {
+      flex: 1,
+    },
+    chapterTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+    chapterSubtitle: {
+      fontSize: 12,
+      color: '#666',
+      marginTop: 2,
+    },
+  });
 
   if (loading) {
     return (
@@ -132,47 +175,5 @@ const ChapterScreenComponent = ( {route} ) => {
   );
     
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    color: "#000",
-    padding: 10,
-    borderRadius: 8,
-    margin: 10,
-    paddingBottom: 0,
-    paddingTop: 10,
-    marginBottom: 10,
-    justifyContent: 'top',
-    alignItems: 'center',
-  },
-  listContainer: {
-    padding: 10,
-  },
-  listItem: {
-    width:325,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    padding: 5,
-    marginVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  textContainer: {
-    flex: 1,
-  },
-  chapterTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  chapterSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-});
 
 export default ChapterScreenComponent;

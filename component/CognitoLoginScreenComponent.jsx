@@ -43,11 +43,15 @@ const CognitoLoginScreenComponent = ( {route} ) => {
     const handleLogin = async () => {
         try {
             const tokens = await cognitoSignIn(username, password);
-            setMessage("Welcome Back! \n You are being redirected...");
-            navigation.goBack();
+            setMessage("Welcome Back " + username + "!");
+            //navigation.goBack();
+            setTimeout(() => {
+              navigation.goBack(); // Navigate back to the previous screen
+            }, 1500)
 
         } catch (err) {
-            setMessage(err.message || JSON.stringify(err));
+          setMessage("Error logging in.");  
+          //setMessage(err.message || JSON.stringify(err));
         }
     };
 
@@ -61,7 +65,7 @@ const CognitoLoginScreenComponent = ( {route} ) => {
 
     const handleVerifyAccount = async () => {
         console.log("verify account");
-        navigation.navigate('AccountVerification', { });
+        navigation.navigate('AccountVerification');
     };
 
 
@@ -150,7 +154,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#007AFF',
-    paddingVertical: 15,
+    paddingVertical: 5,
     borderRadius: 8,
     marginTop: 10,
   },
@@ -193,7 +197,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     paddingHorizontal: 10,
-    marginBottom: 15,
+    marginBottom: 5,
     width: '300',
   },
   passwordInput: {

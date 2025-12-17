@@ -1,26 +1,20 @@
-import React, {useEffect, useState} from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, {useEffect, useState, useContext } from 'react';
 import {   ScrollView, StyleSheet, Text, View, Platform, TouchableOpacity, Image } from 'react-native';
 import * as RNIap from 'react-native-iap';
 import { useI18n } from '.././context/I18nContext'; 
 var Environment = require('.././context/environment.ts');
 import { useNavigation, navigate } from '@react-navigation/native';
-import { initIAP, connection } from './context/iapService.js';
+import { RevenueCatContext } from '.././context/RevenueCatContext';
+import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
 
-
-
-
-const subscriptionSkus = ['sacred_records_monthly_subscription'];
-const errorLog = ({message, error}) => {
-  console.error('An error happened', message, error);
-};
-
-const isIos = Platform.OS === 'ios';
 
 
 const AppleSubscriptionScreenComponent = ({route}) => {
   //const { connection } = useIAP();
-  const [loading, setLoading] = useState(false);
-  const [subscriptions, setSubscriptions] = useState();
+
+  const {    isLoading,    activeSubscription,    purchaseMonthly,  } = useContext(RevenueCatContext);
+  const [displayPaywall, setDisplayPaywall] = useState(false);
   const { language, setLanguage, translate } = useI18n();
   const [ message, setMessage] = useState('');
   const navigation = useNavigation();
@@ -29,135 +23,129 @@ const AppleSubscriptionScreenComponent = ({route}) => {
   if(isIOS) {
       serverUrl = Environment.IOS_NODE_SERVER_URL;
   }
-  
 
-  const getProducts = async () => {
-    try {
 
-      //initIAP()
-      const hasActiveSubscriptions = await RNIap.hasActiveSubscriptions();
-      console.log("hasActiveSubscriptions");
-      console.log(hasActiveSubscriptions);
 
-      const products = await RNIap.getActiveSubscriptions();
-      console.log('Available subscriptions', products);
-      setSubscriptions(products);
-      console.log(subscriptions);
-    } catch (err) {
-      console.warn('getSubscriptions error', err);
-    }
-  };
-
+ 
   const subscribe = async() => {
     console.log("subscribe");
-    console.log(RNIap);
-
-    
     try {
-      if(subscriptions?.length>0) {
-       const purchase = await RNIap.requestPurchase(subscriptions[0]);
-        console.log('purchase success', purchase);
-
-        // You’ll send this receipt to your backend
-        const receipt = purchase.transactionReceipt;
-        console.log("receipt");
-        console.log(receipt);
-        if (receipt) {
-
-          const myJwtToken = await retrieveJwtToken();
-          const response = await fetch(serverUrl + '/subscriptions/appleVerifySubscription', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${myJwtToken}`
-              },
-              body: JSON.stringify({ receipt }),
-          });
-          if (!response.ok) {
-
-            if(response.status === 400) {
-              console.log("No Receipt");
-              setMessage("Subscription Attempt Failed. No Receipt. Contact customer support at brian.nettles@trisummit.io.");
-            }
-            if(response.status === 401) {
-              console.log("No JwtToken");
-              setMessage("No JwtToken");
-            }            
-            if(response.status === 500) {
-              const tokenRefreshObj = await refreshJwtToken();
-              
-              if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
-                setJwtToken(tokenRefreshObj.jwtToken);
-                saveJwtToken(tokenRefreshObj.jwtToken);
-                setLoading("false");
-                //await createQzSubscriptionIntent();
-              } else {
-                // its been a week.  Login from this location.
-                setJwtToken();
-                deleteJwtToken();
-              }
-            }
-          } else {
-            setMessage(response.message);
-            console.log("response");
-            console.log(response);
-            setMessage(response.success);
-              //success: true,
-              //environment: validationResult.environment,
-              //receipt: validationResult.data,
-
-            if(response.message=="success") {
-              await RNIap.finishTransaction(purchase);
-            }
-          }
-        }
- 
-      } else {
-        setMessage("There are no subscriptions available. Apple, please work with me to get past this hurdle. The subscription has been made in App Store Connect and is called sacred_records_monthly_subscription.  I have successfully tested it in your sandbox environment.");
+        //setDisplayPaywall(true);
+      const result = await RevenueCatUI.presentPaywall();
+      if (result === PAYWALL_RESULT.PURCHASED) {
+        console.log("User purchased!");
       }
+        //const purchaseResult = await purchaseMonthly();
+        //console.log("purchaseResult:");
+        //console.log(purchaseResult);
+        // upon failure throws error.
     } catch (err) {
-      console.warn('Purchase error', err);
+      console.warn("Subscription error:", err);
+      setMessage("Error when attempting to subscribe: " + err.message );
+    } finally {
+      navigation.navigate('QuetzalBookshelf');
     }
   }
+/*
+{ customerInfo: 
+   { allPurchasedProductIdentifiers: [ 'monthly' ],
+     latestExpirationDateMillis: 1764693205000,
+     firstSeenMillis: 1764692891000,
+     originalPurchaseDateMillis: null,
+     latestExpirationDate: '2025-12-02T16:33:25Z',
+     allExpirationDatesMillis: { monthly: 1764693205000 },
+     allPurchaseDatesMillis: { monthly: 1764692905000 },
+     managementURL: null,
+     originalApplicationVersion: null,
+     nonSubscriptionTransactions: [],
+     firstSeen: '2025-12-02T16:28:11Z',
+     allExpirationDates: { monthly: '2025-12-02T16:33:25Z' },
+     requestDate: '2025-12-02T16:28:26Z',
+     activeSubscriptions: [ 'monthly' ],
+     entitlements: 
+      { verification: 'NOT_REQUESTED',
+        active: 
+         { 'Sacred Records Pro': 
+            { periodType: 'NORMAL',
+              billingIssueDetectedAtMillis: null,
+              identifier: 'Sacred Records Pro',
+              ownershipType: 'PURCHASED',
+              billingIssueDetectedAt: null,
+              willRenew: true,
+              productPlanIdentifier: null,
+              verification: 'NOT_REQUESTED',
+              originalPurchaseDateMillis: 1764692905000,
+              latestPurchaseDate: '2025-12-02T16:28:25Z',
+              latestPurchaseDateMillis: 1764692905000,
+              originalPurchaseDate: '2025-12-02T16:28:25Z',
+              isActive: true,
+              expirationDateMillis: 1764693205000,
+              store: 'TEST_STORE',
+              expirationDate: '2025-12-02T16:33:25Z',
+              productIdentifier: 'monthly',
+              isSandbox: true,
+              unsubscribeDetectedAt: null,
+              unsubscribeDetectedAtMillis: null } },
+        all: 
+         { 'Sacred Records Pro': 
+            { unsubscribeDetectedAt: null,
+              expirationDate: '2025-12-02T16:33:25Z',
+              latestPurchaseDateMillis: 1764692905000,
+              productIdentifier: 'monthly',
+              originalPurchaseDate: '2025-12-02T16:28:25Z',
+              productPlanIdentifier: null,
+              isSandbox: true,
+              unsubscribeDetectedAtMillis: null,
+              billingIssueDetectedAt: null,
+              identifier: 'Sacred Records Pro',
+              verification: 'NOT_REQUESTED',
+              originalPurchaseDateMillis: 1764692905000,
+              periodType: 'NORMAL',
+              billingIssueDetectedAtMillis: null,
+              ownershipType: 'PURCHASED',
+              isActive: true,
+              expirationDateMillis: 1764693205000,
+              latestPurchaseDate: '2025-12-02T16:28:25Z',
+              willRenew: true,
+              store: 'TEST_STORE' } } },
+     originalPurchaseDate: null,
+     originalAppUserId: '$RCAnonymousID:029a5287029b41d48c1ddcf1575f4212',
+     allPurchaseDates: { monthly: '2025-12-02T16:28:25Z' },
+     subscriptionsByProductIdentifier: 
+      { monthly: 
+         { purchaseDate: '2025-12-02T16:28:25Z',
+           store: 'TEST_STORE',
+           periodType: 'NORMAL',
+           originalPurchaseDate: '2025-12-02T16:28:25Z',
+           storeTransactionId: 'test_1764692905858_700B70EA-8523-4236-A881-84D73F520C6E',
+           productIdentifier: 'monthly',
+           isSandbox: true,
+           unsubscribeDetectedAt: null,
+           gracePeriodExpiresDate: null,
+           ownershipType: 'PURCHASED',
+           isActive: true,
+           willRenew: true,
+           price: { currency: 'USD', amount: 9.99 },
+           billingIssuesDetectedAt: null,
+           refundedAt: null,
+           expiresDate: '2025-12-02T16:33:25Z' } },
+     requestDateMillis: 1764692906346 },
+  transaction: 
+   { productIdentifier: 'monthly',
+     purchaseDate: '2025-12-02T16:28:25Z',
+     revenueCatId: 'test_1764692905858_700B70EA-8523-4236-A881-84D73F520C6E',
+     productId: 'monthly',
+     purchaseDateMillis: 1764692905858.891,
+     transactionIdentifier: 'test_1764692905858_700B70EA-8523-4236-A881-84D73F520C6E' },
+  productIdentifier: 'monthly' }
+*/
 
 
-  useEffect( () => {
-    
-    const initIAP = async () => {
-      try {
 
-        //const result = await RNIap.initConnection();
-        //console.log('IAP Connection', result);
-        //console.log("connection in iapServices");
-        //console.log(connection);
-        console.log(RNIap);
-        try{  
-          const subscriptions = await RNIap.getActiveSubscriptions();
-          console.log("active subscriptions");
-          console.log(subscriptions);
-        } catch(e){ 
-          console.log(e); 
-          console.log("error in getActiveSubscriptions");
-        }  
-        try{  
-          //const products = await RNIap.fetchProducts();
-          //console.log("products");
-          //console.log(products);
-        } catch(e){ 
-          console.log(e); 
-          console.log("error in fetchProducts");
-        }  
-        //await RNIap.flushFailedPurchasesCachedAsPendingAndroid(); // safe on iOS too
-      } catch (err) {
-        //console.warn('IAP connection error', err);
-      }
-    };
-    
-    initIAP();
-    getProducts();
-  }, []);
-  
+  if (isLoading) return <Text>Loading…</Text>; 
 
+  if (activeSubscription)
+    return <Text>You already have access.</Text>;
 
   return (
       <ScrollView>
@@ -175,9 +163,19 @@ const AppleSubscriptionScreenComponent = ({route}) => {
           </TouchableOpacity>
           <Text style={styles.errorText}>{message}</Text>
         </View>
+        {
+          displayPaywall ? (
+            <RevenueCatUI.Paywall 
+                onDismiss={() =>{
+
+                }} />
+          ) : ( 
+             <></>
+          )
+        }
       </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

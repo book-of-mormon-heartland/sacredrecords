@@ -7,6 +7,9 @@ import DeleteAccountScreenComponent from './DeleteAccountScreenComponent';
 import CancelSubscriptionScreenComponent from './CancelSubscriptionScreenComponent';
 import ViewTermsScreenComponent from './ViewTermsScreenComponent';
 import LoginScreenComponent from './LoginScreenComponent';
+import CreateCognitoAccountScreenComponent from './CreateCognitoAccountScreenComponent';
+import AccountVerificationScreenComponent from './AccountVerificationScreenComponent';
+import ForgotPasswordScreenComponent from './ForgotPasswordScreenComponent';
 import { useNavigation, navigate } from '@react-navigation/native';
 import { ThemeContext } from '.././context/ThemeContext';
 
@@ -107,6 +110,45 @@ const SettingsStackNavigatorComponent = () => {
 
         }}
         component={LoginScreenComponent} />
+
+      <SettingsStack.Screen name="CreateCognitoAccount"
+        options = {{
+          title: translate('create_account'),
+          headerTitleAlign: 'center',
+          tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
+          tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
+          tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
+          tabBarShowLabel: true,
+
+        }}
+        component={CreateCognitoAccountScreenComponent} />
+
+      <SettingsStack.Screen name="AccountVerification"
+        options = {{
+          title: translate('verify_account'),
+          headerTitleAlign: 'center',
+          tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
+          tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
+          tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
+          tabBarShowLabel: true,
+
+        }}
+        component={AccountVerificationScreenComponent} />
+
+      <SettingsStack.Screen name="ForgotPassword"
+        options = {{
+          title: translate('forgot_password'),
+          headerTitleAlign: 'center',
+          tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
+          tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
+          tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
+          tabBarShowLabel: true,
+
+        }}
+        component={ForgotPasswordScreenComponent} />
+
+
+
 
     </SettingsStack.Navigator>
   );

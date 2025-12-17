@@ -1,9 +1,6 @@
 import React, { useState,  useContext } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import BookshelfScreenComponent from './BookshelfScreenComponent';
-import BookScreenComponent from './BookScreenComponent';
-import ChaptersScreenComponent from './ChaptersScreenComponent';
-import ChapterContentScreenComponent from './ChapterContentScreenComponent';
+import BookmarkScreenComponent from './BookmarkScreenComponent';
 import LoginScreenComponent from './LoginScreenComponent';
 import { useI18n } from '.././context/I18nContext'; 
 import CreateCognitoAccountScreenComponent from './CreateCognitoAccountScreenComponent';
@@ -12,31 +9,28 @@ import ForgotPasswordScreenComponent from './ForgotPasswordScreenComponent';
 import { ThemeContext } from '.././context/ThemeContext';
 
 
-const BooksStack = createNativeStackNavigator();
+const BookmarkStack = createNativeStackNavigator();
 
-const BookStackNavigatorComponent = () => {
+const BookmarkStackNavigatorComponent = () => {
 
   const { language, setLanguage, translate } = useI18n();
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
   
   return (
-    <BooksStack.Navigator>
-      <BooksStack.Screen name="MyBookshelf" 
+    <BookmarkStack.Navigator>
+      <BookmarkStack.Screen name="MyBookmarks" 
         options = {{
-          title: translate('bookshelf'),
+          title: translate('bookmarks'),
           headerTitleAlign: 'center',
         }}
-        component={BookshelfScreenComponent} />
-      <BooksStack.Screen name="Book" component={BookScreenComponent} />
-      <BooksStack.Screen name="Chapters" component={ChaptersScreenComponent} />
-      <BooksStack.Screen name="ChapterContent" component={ChapterContentScreenComponent} />
-      <BooksStack.Screen name="SignIn" component={LoginScreenComponent} options = {{
+        component={BookmarkScreenComponent} />
+
+      <BookmarkStack.Screen name="SignIn" component={LoginScreenComponent} options = {{
           title: translate('sign_in'),
           headerTitleAlign: 'center',
         }} />
 
-
-      <BooksStack.Screen name="CreateCognitoAccount"
+      <BookmarkStack.Screen name="CreateCognitoAccount"
         options = {{
           title: translate('create_account'),
           headerTitleAlign: 'center',
@@ -48,7 +42,7 @@ const BookStackNavigatorComponent = () => {
         }}
         component={CreateCognitoAccountScreenComponent} />
 
-      <BooksStack.Screen name="AccountVerification"
+      <BookmarkStack.Screen name="AccountVerification"
         options = {{
           title: translate('verify_account'),
           headerTitleAlign: 'center',
@@ -60,7 +54,7 @@ const BookStackNavigatorComponent = () => {
         }}
         component={AccountVerificationScreenComponent} />
 
-      <BooksStack.Screen name="ForgotPassword"
+      <BookmarkStack.Screen name="ForgotPassword"
         options = {{
           title: translate('forgot_password'),
           headerTitleAlign: 'center',
@@ -72,13 +66,9 @@ const BookStackNavigatorComponent = () => {
         }}
         component={ForgotPasswordScreenComponent} />
 
-
-
-
-
-    </BooksStack.Navigator>
+    </BookmarkStack.Navigator>
   );
 };
 
-export default BookStackNavigatorComponent;
+export default BookmarkStackNavigatorComponent;
 

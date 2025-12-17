@@ -5,6 +5,10 @@ import Spacer from './Spacer';
 import { AuthContext } from '.././context/AuthContext';
 import { useI18n } from '.././context/I18nContext'; 
 var Environment = require('.././context/environment.ts');
+import { RevenueCatContext } from '.././context/RevenueCatContext';
+import RevenueCatUI from "react-native-purchases-ui";
+
+
 
 
 
@@ -13,52 +17,23 @@ const CancelSubscriptionScreenComponent = ( {navigation} ) => {
   const { language, setLanguage, translate } = useI18n();
   // Use state to manage the input values
   const [validationError, setValidationError] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(true);
-  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isStripeSubscribed, setIsStripeSubscribed] = useState(false);
+  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, deleteJwtToken, checkIfStripeSubscribed } = useContext(AuthContext);
   const isIOS = ( Platform.OS === 'ios' );
   let serverUrl = Environment.NODE_SERVER_URL;
   if(isIOS) {
       serverUrl = Environment.IOS_NODE_SERVER_URL;
   }
+  const {    checkIfSubscribed  } = useContext(RevenueCatContext);
   
 
 
   const fetchData = async () => {
-    const  apiEndpoint = serverUrl + "/subscriptions/isUserSubscribed"; // Example endpoint
-    try {
-      const response = await fetch(apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwtToken}`
-        },
-        body: JSON.stringify({ 
-          subscription: "quetzal-condor" 
-        }),
-      });
-      if (!response.ok) {
-        if(response.status === 500) {
-          const tokenRefreshObj = await refreshJwtToken();
-          if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
-            await setJwtToken(tokenRefreshObj.jwtToken);
-            await saveJwtToken(tokenRefreshObj.jwtToken);
-            fetchData();
-          } else {
-            await setJwtToken();
-            await deleteJwtToken();
-          }
-        }
-      } else {
-        const json = await response.json();
-        //console.log(json);
-        //console.log("isSubscribed")
-        //console.log(json.isSubscribed);
-        setIsSubscribed(json.isSubscribed);
-      }
-    } catch (error) {
-      console.log("Error");
-      console.log(error);
-    } 
+    const isSubscribed = await checkIfSubscribed();
+    setIsSubscribed(isSubscribed);
+    const stripeSubscribed = await checkIfStripeSubscribed();
+    setIsStripeSubscribed(stripeSubscribed);
   };
 
   useFocusEffect(
@@ -95,7 +70,6 @@ const CancelSubscriptionScreenComponent = ( {navigation} ) => {
       console.log(error);
     }
 
-
     try {
       await Linking.openURL('https://apps.apple.com/account/subscriptions');
     } catch (err) {
@@ -103,45 +77,52 @@ const CancelSubscriptionScreenComponent = ( {navigation} ) => {
     }
   }
 
-  const cancelAndroidSubscription = async() => {
+  const cancelAndroidRevenueCatSubscription = async() => {
+    try {
+      await Linking.openURL('https://play.google.com/store/account/subscriptions?package=com.sacredrecords');
+    } catch (err) {
+      Alert.alert('Error', 'Unable to open subscriptions page.');
+    }
+  }
+
+  const cancelAndroidStripeSubscription = async() => {
         //console.log("cancel subscription");
     // check all three values to see if there is content.
-    let names={
-      subscription: "quetzal-condor"
-    };
-    try {
-      const response = await fetch(serverUrl + '/payments/cancelSubscription', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwtToken}`
-          },
-          body: JSON.stringify(names),
-      });
-      if (!response.ok) {
-        console.log("response was not okay");
-      } else {
-        const json = await response.json();
-        setValidationError(json.message);
+    if(jwtToken) {
+      let names={
+        subscription: "quetzal-condor"
+      };
+      try {
+        const response = await fetch(serverUrl + '/payments/cancelSubscription', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${jwtToken}`
+            },
+            body: JSON.stringify(names),
+        });
+        if (!response.ok) {
+          console.log("response was not okay");
+        } else {
+          const json = await response.json();
+          setValidationError(json.message);
+        }
+      } catch (error) {
+        console.log("Error");
+        console.log(error);
       }
-    } catch (error) {
-      console.log("Error");
-      console.log(error);
+    }
+
+    try {
+      await Linking.openURL('https://play.google.com/store/account/subscriptions?package=com.sacredrecords');
+    } catch (err) {
+      Alert.alert('Error', 'Unable to open subscriptions page.');
     }
   }
 
 
 
-  const cancelSubscription = async() => {
-
-    if(isIOS) {
-      cancelAppleSubscription();
-    } else {
-      cancelAndroidSubscription();
-    }
-  }
-
-  if(isSubscribed) {
+  if(isIOS && isSubscribed) {
     return (
       <ScrollView>
         <View style={styles.container}>
@@ -149,27 +130,78 @@ const CancelSubscriptionScreenComponent = ( {navigation} ) => {
           <Text>{translate('cancel_subscription_text')}</Text>
           <Spacer size={20} /> 
 
-          <TouchableOpacity style={styles.submitButton} onPress={() => cancelSubscription() }>
+          <TouchableOpacity style={styles.submitButton} onPress={() => cancelAppleSubscription() }>
             <Text style={styles.submitButtonText}>{translate('cancel_subscription_button')}</Text>
           </TouchableOpacity>
           <Text style={styles.errorText}>{validationError}</Text>
         </View>
       </ScrollView>
     );
-  } else {
+  } else if(!isIOS && isSubscribed && isStripeSubscribed)  {
     
     return (
       <ScrollView>
         <View style={styles.container}>
-          <Text>{translate('cancel_subscription_text_not_needed')}</Text>
+
+
+          <Text>{translate('cancel_android_stripe_subscription_text')}</Text>
+          <Spacer size={20} /> 
+
+          <TouchableOpacity style={styles.submitButton} onPress={() => cancelAndroidStripeSubscription() }>
+            <Text style={styles.submitButtonText}>{translate('cancel_subscription_button')}</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.errorText}>{validationError}</Text>
+
         </View>
       </ScrollView>
+
+    );
+
+
+  } else if(!isIOS && isSubscribed && !isStripeSubscribed)  {
+    
+    return (
+      <ScrollView>
+        <View style={styles.container}>
+
+
+          <Text>{translate('cancel_android_revenue_cat_subscription_text')}</Text>
+          <Spacer size={20} /> 
+
+          <TouchableOpacity style={styles.submitButton} onPress={() => cancelAndroidRevenueCatSubscription() }>
+            <Text style={styles.submitButtonText}>{translate('cancel_subscription_button')}</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.errorText}>{validationError}</Text>
+        </View>
+      </ScrollView>
+
+    );
+
+
+   } else if(!isIOS)  {
+    
+    return (
+      <ScrollView>
+        <View style={styles.container}>
+
+          <Text>{translate('cancel_android_stripe_subscription_text')}</Text>
+          <Spacer size={20} /> 
+
+          <TouchableOpacity style={styles.submitButton} onPress={() => cancelAndroidStripeSubscription() }>
+            <Text style={styles.submitButtonText}>{translate('cancel_subscription_button')}</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.errorText}>{validationError}</Text>
+
+        </View>
+      </ScrollView>
+
     );
 
 
   }
-
- 
 };
 
 
@@ -259,3 +291,13 @@ const styles = StyleSheet.create({
 });
 
 export default CancelSubscriptionScreenComponent;
+
+
+/*
+          <Text>{translate('cancel_android_revenue_cat_subscription_text')}</Text>
+          <Spacer size={20} /> 
+
+          <TouchableOpacity style={styles.submitButton} onPress={() => cancelAndroidRevenueCatSubscription() }>
+            <Text style={styles.submitButtonText}>{translate('cancel_subscription_button')}</Text>
+          </TouchableOpacity>
+*/

@@ -1,10 +1,9 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity, useWindowDimensions, Platform  } from 'react-native';
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
-import { Platform } from 'react-native';
 import { useNavigation, navigate } from '@react-navigation/native';
 
 
@@ -24,6 +23,8 @@ const BookScreenComponent = ( {route} ) => {
   if(isIOS) {
       serverUrl = Environment.IOS_NODE_SERVER_URL;
   }
+  const { width } = useWindowDimensions();
+  const listWidth = width*0.9;
 
 
   const handlePress = (id, title) => {
@@ -95,6 +96,38 @@ const BookScreenComponent = ( {route} ) => {
     }, [])
   );
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      color: "#000",
+      padding: 10,
+      borderRadius: 8,
+      margin: 10,
+      paddingBottom: 0,
+      paddingTop: 10,
+      marginBottom: 10,
+      justifyContent: 'top',
+      alignItems: 'center',
+    },
+    listContainer: {
+      width: listWidth,
+      padding: 10,
+    },
+    itemContainer: {
+
+    },
+    image: {
+      width: '80', // Take up the full width of the item container
+      height: '100', // Take up the full width of the item container
+      //aspectRatio: 1, // Maintain a square aspect ratio for thumbnails
+      borderRadius: 8,
+    },
+    text: {
+      marginTop: 5,
+      textAlign: 'center',
+    },
+  });
 
 
   if (loading) {
@@ -128,38 +161,5 @@ const BookScreenComponent = ( {route} ) => {
     
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    color: "#000",
-    padding: 10,
-    borderRadius: 8,
-    margin: 10,
-    paddingBottom: 0,
-    paddingTop: 10,
-    marginBottom: 10,
-    justifyContent: 'top',
-    alignItems: 'center',
-  },
-  listContainer: {
-    paddingHorizontal: 0,
-    width: 350,
-
-  },
-  itemContainer: {
-
-  },
-  image: {
-    width: '80', // Take up the full width of the item container
-    height: '100', // Take up the full width of the item container
-    //aspectRatio: 1, // Maintain a square aspect ratio for thumbnails
-    borderRadius: 8,
-  },
-  text: {
-    marginTop: 5,
-    textAlign: 'center',
-  },
-});
 
 export default BookScreenComponent;

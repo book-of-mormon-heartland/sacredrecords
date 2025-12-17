@@ -9,8 +9,9 @@ import HomeStackNavigatorComponent from './HomeStackNavigatorComponent'; // Adju
 import SettingsStackNavigatorComponent from './SettingsStackNavigatorComponent'; // Adjust path as needed
 import DonateScreenComponent from './DonateScreenComponent'; // Adjust path as needed
 import BookStackNavigatorComponent from './BookStackNavigatorComponent';
+import BookmarkStackNavigatorComponent from './BookmarkStackNavigatorComponent';
 import QuetzalCondorStackNavigatorComponent from './QuetzalCondorStackNavigatorComponent';
-import StoreStackNavigatorComponent from './StoreStackNavigatorComponent';
+//import StoreStackNavigatorComponent from './StoreStackNavigatorComponent';
 //import StoreScreenComponent from './StoreScreenComponent'; // Adjust path as needed
 import { BookOpen, Home, Bookmark, Settings, Package, ShoppingCart, PlusCircle } from "react-native-feather";
 import { useI18n } from '.././context/I18nContext'; 
@@ -66,9 +67,9 @@ const TabsComponent = ( ) => {
                     }}
                 />
                 
-                <Tab.Screen name="Bookmark" component={BookmarkScreenComponent} 
+                <Tab.Screen name="Bookmark" component={BookmarkStackNavigatorComponent} 
                     options = {{
-                        headerShown: true,
+                        headerShown: false,
                         headerTitleAlign: 'center',
                         tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
                         tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
@@ -87,11 +88,12 @@ const TabsComponent = ( ) => {
                     options = {{
                         headerShown: true,
                         headerTitleAlign: 'center',
+                        headerTitleStyle: { fontSize: 12, },
                         tabBarStyle: { backgroundColor: theme === "light" ? "#fff" : "#333" },
                         tabBarActiveTintColor: theme === "light" ? "#000" : "#fff",
                         tabBarInactiveTintColor: theme === "light" ? "#888" : "#aaa",
                         tabBarShowLabel: true,
-                        title: translate('donate_title'), // The key should correspond to your translation file
+                        title: translate('donate_title'),
                         tabBarIcon: ({focused}) => (
                             <View>
                                 <Package  stroke="black" fill="#fff" width={22} height={22}/>

@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
                 service: 'com.sacredrecords.jwt', // your unique key
             }
             );
-           // console.log('JWT token saved successfully!');
+            //console.log('JWT token saved successfully!');
         } catch (error) {
             console.error('Error saving JWT token:', error);
         }
@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
 
 
     const refreshJwtToken = async () => {
-       //console.log("in refreshJwtToken");
+       console.log("in refreshJwtToken");
         try {
             const postResponse = await fetch(serverUrl + "/authentication/refreshJwtToken", {
                 method: 'POST',
@@ -138,7 +138,7 @@ export const AuthProvider = ({ children }) => {
             });
             if (!postResponse.ok) {
                 console.log("It was an error");
-                throw new Error(`HTTP error! status: ${postResponse.status}`);
+                //throw new Error(`HTTP error! status: ${postResponse.status}`);
             }
             //console.log("refreshJwtToken returned");
             const responseData = await postResponse.json();
@@ -151,7 +151,7 @@ export const AuthProvider = ({ children }) => {
               return obj;
             }
         } catch (error) {
-            console.error('Error:', error);
+            //console.error('Error:', error);
             return JSON.stringify({
                 message: "failure to update",
                 jwtToken: ""
@@ -439,11 +439,11 @@ export const AuthProvider = ({ children }) => {
                     const refreshToken = session.getRefreshToken().getToken();
                     const accessToken = session.getAccessToken().getJwtToken();
                     resolve({ idToken, accessToken, refreshToken });
-                    //console.log("user")
-                    //console.log(user);
+                    console.log("user")
+                    console.log(user);
                 },
                 onFailure: (err) => {
-                    //console.log("Failed to login");
+                    console.log("Failed to login");
                     reject(err);
                 } ,
                 });
@@ -462,18 +462,19 @@ export const AuthProvider = ({ children }) => {
             });
             if (!postResponse.ok) {
 
-                //console.log("Response not ok");
+                console.log("Response not ok");
                 throw new Error(`HTTP error! status: ${postResponse.status}`);
             }
             const responseData = await postResponse.json();
             const obj = JSON.parse(responseData);
-            //console.log(obj);
+            console.log(obj);
             
             if(obj?.language && (obj.language != "")) {
                 setLanguage(obj.language);
             }
 
             if(obj?.jwtToken) {
+                console.log("We have the jwttoken and signing in the user.");
                 setJwtToken(obj.jwtToken || "");
                 setRefreshToken(obj.refreshToken || "");
                 setMessage("Logged In Successfully");
@@ -497,8 +498,8 @@ export const AuthProvider = ({ children }) => {
             }
             
         } catch (error) {
-           // console.log("We got some error here.")
-           // console.error('Error:', error);
+            console.log("We got some error here.")
+            console.error('Error:', error);
             return "false";
         }
         return user;
@@ -563,10 +564,62 @@ export const AuthProvider = ({ children }) => {
     }
 
 
+    const checkIfStripeSubscribed = async() => {
+        console.log("checking is stripe subscribed");
+        const  apiEndpoint = serverUrl + "/subscriptions/getSubscriptions"; // Example endpoint
+        const myJwtToken = await retrieveJwtToken();
+        if(myJwtToken) {
+        try {
+            const response = await fetch(apiEndpoint, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${myJwtToken}`
+            }
+            });
+            if (!response.ok) {
+            if(response.status === 500) {
+                const tokenRefreshObj = await refreshJwtToken();
+                if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
+                setJwtToken(tokenRefreshObj.jwtToken);
+                saveJwtToken(tokenRefreshObj.jwtToken);
+                } else {
+                // its been a week.  Login from this location.
+                setJwtToken();
+                deleteJwtToken();
+                }
+            }
+            } else {
+            const json = await response.json();
+            console.log("this is the json");
+            console.log(json);
+            const message = JSON.parse(json);
+            if (message?.subscriptions.includes("quetzal-condor")) {
+                console.log("Setting Stripe is Subscribed to true");
+                //setIsStripeSubscribed(true);
+                //setDummy(false);
+                console.log("Setting dummy false");
+                return true;
+            } else {
+                console.log("setting isStripeSubscribed to false 1");
+                //setIsStripeSubscribed(false);
+                return false;
+            }
+            }
+        } catch (error) {
+            console.log("setting isStripeSubscribed to false 2");
+            //setIsStripeSubscribed(false);
+            //setDummy(true);
+            return false;
+        } 
+        }
+    }
+
+
     return (
-        <AuthContext.Provider value={{ signOut, cognitoSignIn, cognitoCreateAccount, cognitoVerifyAccount, appleSignIn, googleSignIn, googleSignOut, userProfile, setUserProfile, jwtToken,  setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, refreshJwtToken, setRefreshToken, retrieveRefreshToken, deleteRefreshToken, temporaryJwtToken, setTemporaryJwtToken, temporaryRefreshToken, setTemporaryRefreshToken }}>
+        <AuthContext.Provider value={{ signOut, cognitoSignIn, cognitoCreateAccount, cognitoVerifyAccount, appleSignIn, googleSignIn, googleSignOut, userProfile, setUserProfile, jwtToken,  setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, refreshJwtToken, setRefreshToken, retrieveRefreshToken, deleteRefreshToken, temporaryJwtToken, setTemporaryJwtToken, temporaryRefreshToken, setTemporaryRefreshToken, checkIfStripeSubscribed }}>
             { children }
         </AuthContext.Provider>
     );
     
 }
+

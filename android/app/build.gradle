@@ -83,8 +83,8 @@ android {
         applicationId "com.sacredrecords"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 26
-        versionName "1.26"
+        versionCode 37
+        versionName "1.37"
     }
     signingConfigs {
         debug {

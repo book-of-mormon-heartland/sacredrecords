@@ -54,10 +54,10 @@ const ForgotPasswordScreenComponent = ( {route}) => {
     } 
 
     const user = new CognitoUser({ Username: username, Pool: userPool });
-    console.log("value");
-    console.log(value);
-    console.log("newPassword");
-    console.log(newPassword);
+    //console.log("value");
+    //console.log(value);
+    //console.log("newPassword");
+    //console.log(newPassword);
     
     user.confirmPassword(value, newPassword, {
       onSuccess: () => setMessage('Password reset successful!'),

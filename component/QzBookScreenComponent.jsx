@@ -1,21 +1,24 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
-import { Platform } from 'react-native';
 import { useNavigation, navigate } from '@react-navigation/native';
+import { RevenueCatContext } from '.././context/RevenueCatContext';
+
 
 
 const QzBookScreenComponent = ( {route} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, checkIfStripeSubscribed } = useContext(AuthContext);
+  const {    checkIfSubscribed  } = useContext(RevenueCatContext);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isStripeSubscribed, setIsStripeSubscribed] = useState(false);
   const navigation = useNavigation();
   const { id } = route.params;
   const { title } = route.params;
@@ -24,6 +27,11 @@ const QzBookScreenComponent = ( {route} ) => {
   if(isIOS) {
       serverUrl = Environment.IOS_NODE_SERVER_URL;
   }
+  const { width } = useWindowDimensions();
+  const listWidth = width*0.9;
+  
+
+
 
 
   const handlePress = (id, title) => {
@@ -48,14 +56,54 @@ const QzBookScreenComponent = ( {route} ) => {
 
 
   const fetchData = async () => {
-    const  apiEndpoint = serverUrl + "/books/qzBook"; // Example endpoint
-    const myJwtToken = await retrieveJwtToken();
-    if(!myJwtToken) {
-       setData();
-       return;
+    setLoading(true);
+    let  apiEndpoint = serverUrl + "/books/qzBook"; // Example endpoint
+    if(isIOS) {
+      apiEndpoint = serverUrl + "/books/appleQzBook"; // Example endpoint
+    } else if(isSubscribed) {
+      apiEndpoint = serverUrl + "/books/androidQzBook"; // Example endpoint
     }
-    //console.log("fetchData for book");
-    
+
+    //let apiEndpoint = serverUrl + "/books/qzBook"; // Example endpoint
+    const isSubscribed = await checkIfSubscribed();
+    const myJwtToken = await retrieveJwtToken();
+
+    if(isIOS){
+      if(isSubscribed){
+        apiEndpoint = serverUrl + "/books/appleQzBook"; // Example endpoint
+      } else {
+        setData();
+        setLoading(false);
+        return;
+      }
+    }
+    if(!isIOS){
+      if(isSubscribed){
+        apiEndpoint = serverUrl + "/books/androidQzBook"; // Example endpoint
+      } else {
+        if(!myJwtToken) {
+          setData();
+          setLoading(false);
+          return;
+        } else {
+          // logged in, check if stripe subscribed.
+          apiEndpoint = serverUrl + "/books/qzBook"; 
+          let returned = await checkIfStripeSubscribed();
+          console.log("logged in isStripeSubscribed");
+          console.log(returned);
+          if(returned) {
+            apiEndpoint = serverUrl + "/books/qzBook"; // Example endpoint
+            // load the data.  Don't return
+          } else {
+            setData();
+            setLoading(false);
+            return;
+          }
+        }
+      }
+    }
+
+
     let newEndpoint = apiEndpoint + "?bookid=" + id;
     try {
       const response = await fetch(newEndpoint, {
@@ -118,7 +166,38 @@ const QzBookScreenComponent = ( {route} ) => {
     }, [jwtToken]) // Dependencies array
   );
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      color: "#000",
+      padding: 10,
+      borderRadius: 8,
+      margin: 10,
+      paddingBottom: 0,
+      paddingTop: 10,
+      marginBottom: 10,
+      justifyContent: 'top',
+      alignItems: 'center',
+    },
+    listContainer: {
+      width: listWidth,
+      padding: 10,
+    },
+    itemContainer: {
 
+    },
+    image: {
+      width: '80', // Take up the full width of the item container
+      height: '100', // Take up the full width of the item container
+      //aspectRatio: 1, // Maintain a square aspect ratio for thumbnails
+      borderRadius: 8,
+    },
+    text: {
+      marginTop: 5,
+      textAlign: 'center',
+    },
+  });
 
   if (loading) {
     return (
@@ -151,38 +230,6 @@ const QzBookScreenComponent = ( {route} ) => {
     
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    color: "#000",
-    padding: 10,
-    borderRadius: 8,
-    margin: 10,
-    paddingBottom: 0,
-    paddingTop: 10,
-    marginBottom: 10,
-    justifyContent: 'top',
-    alignItems: 'center',
-  },
-  listContainer: {
-    paddingHorizontal: 0,
-    width: 350,
 
-  },
-  itemContainer: {
-
-  },
-  image: {
-    width: '80', // Take up the full width of the item container
-    height: '100', // Take up the full width of the item container
-    //aspectRatio: 1, // Maintain a square aspect ratio for thumbnails
-    borderRadius: 8,
-  },
-  text: {
-    marginTop: 5,
-    textAlign: 'center',
-  },
-});
 
 export default QzBookScreenComponent;

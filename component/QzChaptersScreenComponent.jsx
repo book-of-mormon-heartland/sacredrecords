@@ -1,12 +1,14 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, useWindowDimensions } from 'react-native';
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
 import { Platform } from 'react-native';
 import { useNavigation, navigate } from '@react-navigation/native';
 import { ChevronRight } from "react-native-feather";
+import { RevenueCatContext } from '.././context/RevenueCatContext';
+
 
 
 
@@ -14,7 +16,8 @@ const QzChapterScreenComponent = ( {route} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
+  const { jwtToken, setJwtToken, refreshJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, checkIfStripeSubscribed } = useContext(AuthContext);
+  const { checkIfSubscribed  } = useContext(RevenueCatContext);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,6 +29,9 @@ const QzChapterScreenComponent = ( {route} ) => {
   if(isIOS) {
       serverUrl = Environment.IOS_NODE_SERVER_URL;
   }
+  const { width } = useWindowDimensions();
+  const listWidth = width*0.9;
+  
 
 
 
@@ -54,11 +60,64 @@ const QzChapterScreenComponent = ( {route} ) => {
 
   //let newEndpoint = apiEndpoint + "?parent=" + id;
   const fetchData = async () => {
-    const  apiEndpoint = serverUrl + "/chapters/qzchapters?parent=" + id; // Example endpoint
+    setLoading(true);
+    let apiEndpoint = serverUrl + "/chapters/qzChapters?parent=" + id; // Example endpoint
+    if(isIOS) {
+      apiEndpoint = serverUrl + "/chapters/appleQzChapters?parent=" + id; // Example endpoint
+    } else if(isSubscribed) {
+      apiEndpoint = serverUrl + "/chapters/androidQzChapters?parent=" + id; // Example endpoint
+    }
+
+    //let apiEndpoint = serverUrl + "/books/qzBook"; // Example endpoint
+    const isSubscribed = await checkIfSubscribed();
     const myJwtToken = await retrieveJwtToken();
-    if(!myJwtToken) {
-       setData();
-       return;
+
+    if(isIOS){
+      if(isSubscribed){
+        apiEndpoint = serverUrl + "/chapters/appleQzChapters?parent=" + id; // Example endpoint
+      } else {
+        setData();
+        setLoading(false);
+        navigation.navigate('QuetzalBookshelf', {
+          id: id,
+          title: title,
+        });
+        return;
+      }
+    }
+    if(!isIOS){
+      if(isSubscribed){
+        apiEndpoint = serverUrl + "/chapters/androidQzChapters?parent=" + id; // Example endpoint
+      } else {
+        if(!myJwtToken) {
+          setData();
+          navigation.navigate('QuetzalBookshelf', {
+            id: id,
+            title: title,
+          });
+
+          setLoading(false);
+          return;
+        } else {
+          // logged in, check if stripe subscribed.
+          apiEndpoint = serverUrl + "/books/qzBook"; 
+          let returned = await checkIfStripeSubscribed();
+          
+          console.log("logged in isStripeSubscribed");
+          console.log(returned);
+          if(returned) {
+            apiEndpoint = serverUrl + "/chapters/qzChapters?parent=" + id;
+          } else {
+            setData();
+            navigation.navigate('QuetzalBookshelf', {
+              id: id,
+              title: title,
+            });
+            setLoading(false);
+            return;
+          }
+        }
+      }
     }
 
     try {
@@ -107,21 +166,68 @@ const QzChapterScreenComponent = ( {route} ) => {
 
 
 
-    useFocusEffect(
-      React.useCallback(() => {
-        const loadData = async () => {
-          navigation.setOptions({
-              title: title,
-          });
-          await fetchData();
-        };
-        loadData();
-        return () => {
-          // cleanup logic
-        };
-      }, [jwtToken]) // Dependencies array
-    );
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadData = async () => {
+        navigation.setOptions({
+            title: title,
+        });
+        await fetchData();
+      };
+      loadData();
+      return () => {
+        // cleanup logic
+      };
+    }, [jwtToken]) // Dependencies array
+  );
   
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      color: "#000",
+      padding: 10,
+      borderRadius: 8,
+      margin: 10,
+      paddingBottom: 0,
+      paddingTop: 10,
+      marginBottom: 10,
+      justifyContent: 'top',
+      alignItems: 'center',
+    },
+    listContainer: {
+      width: listWidth,
+      padding: 10,
+    },
+    listItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#f9f9f9',
+      padding: 5,
+      marginVertical: 5,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: '#ddd',
+    },
+    textContainer: {
+      flex: 1,
+    },
+    chapterTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+    chapterSubtitle: {
+      fontSize: 12,
+      color: '#666',
+      marginTop: 2,
+    },
+  });
+
+
+
+
+
 
   if (loading) {
     return (
@@ -154,46 +260,6 @@ const QzChapterScreenComponent = ( {route} ) => {
     
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    color: "#000",
-    padding: 10,
-    borderRadius: 8,
-    margin: 10,
-    paddingBottom: 0,
-    paddingTop: 10,
-    marginBottom: 10,
-    justifyContent: 'top',
-    alignItems: 'center',
-  },
-  listContainer: {
-    padding: 10,
-  },
-  listItem: {
-    width:325,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    padding: 5,
-    marginVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  textContainer: {
-    flex: 1,
-  },
-  chapterTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  chapterSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-});
+
 
 export default QzChapterScreenComponent;

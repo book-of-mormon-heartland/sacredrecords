@@ -1,17 +1,19 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, useWindowDimensions, Platform } from 'react-native';
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
-import { Platform } from 'react-native';
 import { useNavigation, navigate, CommonActions } from '@react-navigation/native';
 import { Bookmark, Trash2 } from "react-native-feather";
+import { useI18n } from '.././context/I18nContext'; 
+
 
 const BookmarksScreenComponent = ( {route} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
+  const { language, setLanguage, translate } = useI18n();
   const {jwtToken, refreshJwtToken, setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken } = useContext(AuthContext);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +27,10 @@ const BookmarksScreenComponent = ( {route} ) => {
   if(isIOS) {
       serverUrl = Environment.IOS_NODE_SERVER_URL;
   }
+  const { width } = useWindowDimensions();
+  const listWidth = width*0.9;
+  const itemWidth = width*0.75;
+  const trashWidth = width*0.15;
 
 
   const renderItem = ({ item }) => {
@@ -158,8 +164,8 @@ const BookmarksScreenComponent = ( {route} ) => {
           }
         } else {
           const json = await response.json();
-          //console.log("bookmarks data");
-          //console.log(json);
+          console.log("bookmarks data");
+          console.log(json);
           setData(json);
         }      
       } catch (error) {
@@ -231,6 +237,94 @@ const BookmarksScreenComponent = ( {route} ) => {
     }, [jwtToken]) // Dependencies array
   );
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      color: "#000",
+      padding: 10,
+      borderRadius: 8,
+      margin: 10,
+      paddingBottom: 0,
+      paddingTop: 10,
+      marginBottom: 10,
+      justifyContent: 'top',
+      alignItems: 'center',
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 0,
+      paddingHorizontal: 10,
+      backgroundColor: '#ffffff',
+      borderRadius: 8,
+      marginBottom: 10,
+    },
+    listContainer: {
+      width: listWidth,
+      padding: 10,
+    },
+    listItem: {
+      width: itemWidth,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#f9f9f9',
+      padding: 5,
+      marginVertical: 0,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: '#ddd',
+    },
+    textContainer: {
+      flex: 1,
+      paddingLeft: 20,
+    },
+    chapterTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+    chapterSubtitle: {
+      fontSize: 12,
+      color: '#666',
+      marginTop: 2,
+    },
+    bookmarkContainer: {
+      paddingRight: 10,
+    },
+    deleteButton: {
+      paddingLeft: 15,
+      paddingVertical: 4,
+    },
+    signInButtonText: {
+      alignSelf: 'flex-end' 
+    },
+
+    bookmarkButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#007bff', // White background for the button
+      paddingVertical: 3,
+      paddingHorizontal: 3,
+      borderRadius: 5,
+      borderWidth: 1,
+      borderColor: '#E0E0E0', // Light gray border
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+      marginBottom: 0, // For Android shadow
+      marginTop: 0, // For Android shadow
+    },
+    bookmarkButtonText: {
+      color: '#ffffff', // Google's gray text color
+      fontSize: 12,
+    }, 
+    signInButtonText: {
+      alignSelf: 'flex-end' 
+    }
+  });
 
 
   if (loading) {
@@ -253,6 +347,9 @@ const BookmarksScreenComponent = ( {route} ) => {
   if(showSignIn) {
     return (
       <View style={styles.container}>
+        <TouchableOpacity onPress={() => signInToApp()}>
+          <Text style={styles.signInButtonText}>{translate('sign_in_for_bookmarks')}</Text>
+        </TouchableOpacity>
       </View>
     );    
   } else {
@@ -270,63 +367,5 @@ const BookmarksScreenComponent = ( {route} ) => {
   };
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    color: "#000",
-    padding: 10,
-    borderRadius: 8,
-    margin: 10,
-    paddingBottom: 0,
-    paddingTop: 10,
-    marginBottom: 10,
-    justifyContent: 'top',
-    alignItems: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 0,
-    paddingHorizontal: 10,
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  listContainer: {
-    padding: 10,
-  },
-  listItem: {
-    width:275,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    padding: 5,
-    marginVertical: 0,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  textContainer: {
-    flex: 1,
-    paddingLeft: 20,
-  },
-  chapterTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  chapterSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-  bookmarkContainer: {
-    paddingRight: 10,
-  },
-  deleteButton: {
-    paddingLeft: 15,
-    paddingVertical: 4,
-  },
-});
 
 export default BookmarksScreenComponent;

@@ -100,6 +100,11 @@ PODS:
     - Yoga
   - openiap (1.2.32)
   - PromisesObjC (2.4.0)
+  - PurchasesHybridCommon (17.21.0):
+    - RevenueCat (= 5.49.0)
+  - PurchasesHybridCommonUI (17.21.0):
+    - PurchasesHybridCommon (= 17.21.0)
+    - RevenueCatUI (= 5.49.0)
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -2556,6 +2561,9 @@ PODS:
     - React-perflogger (= 0.82.1)
     - React-utils (= 0.82.1)
     - SocketRocket
+  - RevenueCat (5.49.0)
+  - RevenueCatUI (5.49.0):
+    - RevenueCat (= 5.49.0)
   - RNAppleAuthentication (2.4.1):
     - React-Core
   - RNAWSCognito (6.3.15):
@@ -2701,6 +2709,12 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - RNPaywalls (9.6.8):
+    - PurchasesHybridCommonUI (= 17.21.0)
+    - React-Core
+  - RNPurchases (9.6.8):
+    - PurchasesHybridCommon (= 17.21.0)
+    - React-Core
   - RNScreens (4.18.0):
     - boost
     - DoubleConversion
@@ -3032,6 +3046,8 @@ DEPENDENCIES:
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNKeychain (from `../node_modules/react-native-keychain`)
   - RNLocalize (from `../node_modules/react-native-localize`)
+  - RNPaywalls (from `../node_modules/react-native-purchases-ui`)
+  - RNPurchases (from `../node_modules/react-native-purchases`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
@@ -3049,6 +3065,10 @@ SPEC REPOS:
     - GTMSessionFetcher
     - openiap
     - PromisesObjC
+    - PurchasesHybridCommon
+    - PurchasesHybridCommonUI
+    - RevenueCat
+    - RevenueCatUI
     - SocketRocket
     - Stripe
     - StripeApplePay
@@ -3231,6 +3251,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-keychain"
   RNLocalize:
     :path: "../node_modules/react-native-localize"
+  RNPaywalls:
+    :path: "../node_modules/react-native-purchases-ui"
+  RNPurchases:
+    :path: "../node_modules/react-native-purchases"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   RNSVG:
@@ -3261,6 +3285,8 @@ SPEC CHECKSUMS:
   NitroModules: b2a738b643842e817d7bb8a3b157b5223a92a2fa
   openiap: ff565cd77a07ba9e1438d2764a687515ceaa3b6d
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
+  PurchasesHybridCommon: 988d080cd69d7aa0895e52f993dae53b45a0e929
+  PurchasesHybridCommonUI: c6b99413ce2bbcbc959f44921cd2ae5a95746ecf
   RCT-Folly: 59ec0ac1f2f39672a0c6e6cecdd39383b764646f
   RCTDeprecation: f17e2ebc07876ca9ab8eb6e4b0a4e4647497ae3a
   RCTRequired: e2c574c1b45231f7efb0834936bd609d75072b63
@@ -3329,6 +3355,8 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: cc2795efe30a023c3a505676b9c748b664b9c0a1
   ReactCodegen: 897bad2d2f722ff4dc46fc144f9cc018db0e2ce4
   ReactCommon: c5803af00bd3737dc1631749b1f1da5beba5b049
+  RevenueCat: fa9ad7e1c8817deddb737646946b6b3d8b25f54b
+  RevenueCatUI: 057186dc20a7c6726cf59f96cfe2f6251ef5ce61
   RNAppleAuthentication: b2d8b5ccba86b5b1e55a1a2e858f7ac6d8a21816
   RNAWSCognito: b9249919f7e7950ceb546da677b2b5809bf5ef2f
   RNCAsyncStorage: 302f2fac014fd450046c120567ca364632da682b
@@ -3336,6 +3364,8 @@ SPEC CHECKSUMS:
   RNGoogleSignin: ae402eef72546614abaecf50307d6c6c15569e1e
   RNKeychain: 182d986f809280edd9444a557adc21845f7d1e6f
   RNLocalize: 0c78b33746271c77e44835eb785ca545625d0617
+  RNPaywalls: 897cb36c930bcebbb6a98204e84c4e005601ddf2
+  RNPurchases: 406c82aef3d22844e278958fdd2d6e26b37ac27e
   RNScreens: 3693ec4bbc0065151b843269e50e9807644e9918
   RNSVG: 870974196fca9fedd72914d560cc4c774f98d170
   RNVectorIcons: 6acc19c833be864e9c70894e101a587fe491150a
