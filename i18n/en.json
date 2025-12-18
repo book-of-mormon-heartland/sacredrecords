@@ -70,7 +70,7 @@
   "delete_profile_text": "By deleting your personal information, it removes your name, email address, and Google Photo from the users table.  It also removes your name and email from the purchases and subscriptions table in the database.  UserID is retained as it is necessary for application functionality.",
   "unsubscribe_button_text": "Cancel Subscription",
   "cancel_subscription_title" : "Cancel Subscription",
-  "cancel_subscription_text" : "The Maya Quetzal Subscription contains ancient records and teachings found over all of the Americas.  75 percent of the proceeds go to the Maya Quetzal Bio Region Council.  Please consider keeping your subscription alive.",
+  "cancel_subscription_text" : "The Sacred Records Subscription contains ancient records and teachings found over all of the Americas.  75 percent of the proceeds go to tribal unification efforts and to the teaching of these records at events.  Please consider keeping your subscription alive. Your ability to access the records will remain until your monthly subscribed time is expired.",
   "cancel_subscription_text_none" : "You are not subscribed.",
   "cancel_subscription_button" : "Cancel Subscription",
   "cancel_subscription_text_not_needed" : "You are not subscribed.",

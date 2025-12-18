@@ -7,6 +7,7 @@ import { StripeProvider, useStripe } from '@stripe/stripe-react-native';
 import { AuthContext } from '.././context/AuthContext';
 import { RevenueCatContext } from '.././context/RevenueCatContext';
 import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
+import { UtilitiesContext } from '.././context/UtilitiesContext';
 
 
 
@@ -19,6 +20,7 @@ const AndroidSubscriptionScreenComponent = ({route}) => {
   const { jwtToken, refreshJwtToken, setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken,  deleteRefreshToken } = useContext(AuthContext);
   const [subscriptions, setSubscriptions] = useState();
   const { language, setLanguage, translate } = useI18n();
+  const { log } = useContext(UtilitiesContext);
   const [ message, setMessage] = useState('');
   const navigation = useNavigation();
   const isIOS = ( Platform.OS === 'ios' );
@@ -31,13 +33,13 @@ const AndroidSubscriptionScreenComponent = ({route}) => {
 
 
   const subscribe = async() => {
-    console.log("subscribe");
+    //console.log("subscribe");
     try {
         //setDisplayPaywall(true);
       const result = await RevenueCatUI.presentPaywall();
       if (result === PAYWALL_RESULT.PURCHASED) {
-        console.log("User purchased!");
-        console.log(result);
+        //console.log("User purchased!");
+        log(result, "info");
         // add the flag to the database for access.
         finalizePurchase("RevenueCat");
 

@@ -12,6 +12,7 @@ import { StripeProvider, useStripe } from '@stripe/stripe-react-native';
 const tribalImages = require('./../assets/quetzal-image-with-others-400x126.jpg');
 
 
+
 const QuetzalBookScreenComponent = ( {route} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
@@ -119,8 +120,8 @@ const QuetzalBookScreenComponent = ( {route} ) => {
       log("checking isSubscribed", "info");
       log(isSubscribed, "info");
       if(isSubscribed){
-        log("checking isSubscribed", "info");
-        log(isSubscribed, "info");
+        //log("checking isSubscribed", "info");
+        //log(isSubscribed, "info");
         //setShowBanner(false);
         setShowSignIn(false);
         setDummy(false);
@@ -128,10 +129,10 @@ const QuetzalBookScreenComponent = ( {route} ) => {
       } else {
         // check if logged in, if no, return.
         //setShowBanner(true);
-        log("checking NOT SUBSCRIBED", "info");
+        //log("checking NOT SUBSCRIBED", "info");
 
         if(!myJwtToken) {
-          log("NO JwtToken", "info");
+          //log("NO JwtToken", "info");
           setShowSignIn(true);
           setDummy(true);
           //setData();
@@ -141,8 +142,8 @@ const QuetzalBookScreenComponent = ( {route} ) => {
           apiEndpoint = serverUrl + "/books/getQzBooks"; // Example endpoint\            
           setShowSignIn(false);
           let returned = await checkIfStripeSubscribed();
-          console.log("logged in isStripeSubscribed");
-          console.log(returned);
+          //console.log("logged in isStripeSubscribed");
+          //console.log(returned);
           if(returned) {
             setDummy(false);
           } else {

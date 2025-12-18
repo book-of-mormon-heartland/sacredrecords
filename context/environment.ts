@@ -22,7 +22,7 @@ var _Environments = {
     development: {
         GOOGLE_ANDROID_CLIENT_ID: '422742245899-ufr5f16vg2qot4v8lig4fg7osb4ettd6.apps.googleusercontent.com', 
         GOOGLE_IOS_CLIENT_ID: '376185747738-t1nrjh269jqarco0grlo6a5vs8fcbf8b.apps.googleusercontent.com',
-        NODE_SERVER_URL: 'http://10.0.2.2:8080',
+        NODE_SERVER_URL: 'http://192.168.1.171:8080',
         IOS_NODE_SERVER_URL: 'http://192.168.1.171:8080',
         STRIPE: 'pk_test_51S5HljI3OpurKhfBz0qlqNOGpHh3JOh04hhZl8ZRWqXh0WMPl8wwLvcgxXYP3LPvmo1uIW15iEhpiEoAkhoLOHZl0018MbHbG7',
         STRIPE_CALLBACK: 'https://sacred-records-node-dev-shell-376185747738.us-central1.run.app/payments/paymentCallback',

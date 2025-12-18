@@ -3,6 +3,8 @@ import React, { useState, useContext } from 'react';
 import { View, TextInput, Button, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { AuthContext } from '.././context/AuthContext';
 import { useNavigation, navigate } from '@react-navigation/native';
+import { RevenueCatContext } from '.././context/RevenueCatContext';
+
 
 //import AccountVerificationScreenComponent from './AccountVerificationScreenComponent.jsx';
 import { Eye, EyeOff } from "react-native-feather";
@@ -15,11 +17,13 @@ const CognitoLoginScreenComponent = ( {route} ) => {
 
     const navigation = useNavigation(); 
     
-    const {  googleSignIn, cognitoSignIn } = useContext(AuthContext);
+    const {  userId, googleSignIn, cognitoSignIn, userProfile } = useContext(AuthContext);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const {    checkIfSubscribed, revenueCatLogin } = useContext(RevenueCatContext);
+
     
 
 
@@ -43,13 +47,23 @@ const CognitoLoginScreenComponent = ( {route} ) => {
     const handleLogin = async () => {
         try {
             const tokens = await cognitoSignIn(username, password);
+            //console.log(tokens);
+            console.log("userid");
+            console.log(userId);
             setMessage("Welcome Back " + username + "!");
+            try {
+              revenueCatLogin(userId);
+            } catch (error) {
+              console.log("error on revenueCatLogin");
+              console.log(error);
+            }
             //navigation.goBack();
             setTimeout(() => {
               navigation.goBack(); // Navigate back to the previous screen
             }, 1500)
 
         } catch (err) {
+          console.log(err)
           setMessage("Error logging in.");  
           //setMessage(err.message || JSON.stringify(err));
         }

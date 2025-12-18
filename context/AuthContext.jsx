@@ -1,10 +1,11 @@
-import { createContext, useState } from  "react";
+import { createContext, useContext, useState } from  "react";
 import { GoogleSignin, isSuccessResponse } from '@react-native-google-signin/google-signin';
 var Environment = require('./environment.ts');
 import { Platform } from 'react-native';
 import { useI18n } from '.././context/I18nContext';
 import * as Keychain from 'react-native-keychain'; 
 import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
+import { RevenueCatContext } from '.././context/RevenueCatContext';
 
 
 
@@ -15,11 +16,12 @@ export const AuthProvider = ({ children }) => {
     //const [googleMessage, setGoogleMessage] = useState("Not Signed In");
     const [message, setMessage] = useState("");
     const [userProfile, setUserProfile] = useState(undefined);
+    const [userId, setUserId] = useState("");
     const [jwtToken, setJwtToken] = useState("");
     const [refreshToken, setRefreshToken] = useState("");
     const [temporaryJwtToken, setTemporaryJwtToken] = useState("");
     const [temporaryRefreshToken, setTemporaryRefreshToken] = useState("");
-    
+    const {  logOutCognito  } = useContext(RevenueCatContext);
     const { language, setLanguage, translate } = useI18n();
     const isIOS = ( Platform.OS === 'ios' );
     let serverUrl = Environment.NODE_SERVER_URL;
@@ -161,9 +163,12 @@ export const AuthProvider = ({ children }) => {
 
 
   const signOut = async () => {
-        console.log("signOut in auth context");
+        //console.log("signOut in auth context");
         try {
             //const signoutResponse = await GoogleSignin.signOut();
+            if(!isIOS) {
+                logOutCognito();
+            }
             setUserProfile(undefined);
             setJwtToken("");
             setRefreshToken("");
@@ -427,10 +432,10 @@ export const AuthProvider = ({ children }) => {
 
     
     const cognitoSignIn = async (Username, Password) => {
-        
+        //let appUser = {};
         const user = new CognitoUser({ Username, Pool: userPool });
         const authDetails = new AuthenticationDetails({ Username, Password });
-        //console.log(user);
+        console.log(user);
 
         const authenticatedUser = await new Promise((resolve, reject) => {
             user.authenticateUser(authDetails, {
@@ -467,18 +472,23 @@ export const AuthProvider = ({ children }) => {
             }
             const responseData = await postResponse.json();
             const obj = JSON.parse(responseData);
-            console.log(obj);
-            
+            console.log("Login Obj response.user");
+            console.log(obj.user);
+            //appUser=obj.user;
             if(obj?.language && (obj.language != "")) {
                 setLanguage(obj.language);
             }
+            console.log("userId");
+            console.log(obj.user.id);
+            setUserId(obj.user.id)
+
 
             if(obj?.jwtToken) {
                 console.log("We have the jwttoken and signing in the user.");
                 setJwtToken(obj.jwtToken || "");
                 setRefreshToken(obj.refreshToken || "");
                 setMessage("Logged In Successfully");
-                setUserProfile(user);
+                setUserProfile(obj.user);
                 saveJwtToken(obj.jwtToken);
                 saveRefreshToken(obj.refreshToken);
                 setTemporaryJwtToken("");
@@ -502,7 +512,7 @@ export const AuthProvider = ({ children }) => {
             console.error('Error:', error);
             return "false";
         }
-        return user;
+        //return appUser;
     };
 
     const cognitoCreateAccount = async (username, givenName, familyName, fullName, email, password) => {
@@ -565,7 +575,7 @@ export const AuthProvider = ({ children }) => {
 
 
     const checkIfStripeSubscribed = async() => {
-        console.log("checking is stripe subscribed");
+        //console.log("checking is stripe subscribed");
         const  apiEndpoint = serverUrl + "/subscriptions/getSubscriptions"; // Example endpoint
         const myJwtToken = await retrieveJwtToken();
         if(myJwtToken) {
@@ -589,21 +599,21 @@ export const AuthProvider = ({ children }) => {
                 }
             }
             } else {
-            const json = await response.json();
-            console.log("this is the json");
-            console.log(json);
-            const message = JSON.parse(json);
-            if (message?.subscriptions.includes("quetzal-condor")) {
-                console.log("Setting Stripe is Subscribed to true");
-                //setIsStripeSubscribed(true);
-                //setDummy(false);
-                console.log("Setting dummy false");
-                return true;
-            } else {
-                console.log("setting isStripeSubscribed to false 1");
-                //setIsStripeSubscribed(false);
-                return false;
-            }
+                const json = await response.json();
+                //console.log("this is the json");
+                //console.log(json);
+                const message = JSON.parse(json);
+                if (message?.subscriptions.includes("quetzal-condor")) {
+                    //console.log("Setting Stripe is Subscribed to true");
+                    //setIsStripeSubscribed(true);
+                    //setDummy(false);
+                    //console.log("Setting dummy false");
+                    return true;
+                } else {
+                    //console.log("setting isStripeSubscribed to false 1");
+                    //setIsStripeSubscribed(false);
+                    return false;
+                }
             }
         } catch (error) {
             console.log("setting isStripeSubscribed to false 2");
@@ -616,7 +626,7 @@ export const AuthProvider = ({ children }) => {
 
 
     return (
-        <AuthContext.Provider value={{ signOut, cognitoSignIn, cognitoCreateAccount, cognitoVerifyAccount, appleSignIn, googleSignIn, googleSignOut, userProfile, setUserProfile, jwtToken,  setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, refreshJwtToken, setRefreshToken, retrieveRefreshToken, deleteRefreshToken, temporaryJwtToken, setTemporaryJwtToken, temporaryRefreshToken, setTemporaryRefreshToken, checkIfStripeSubscribed }}>
+        <AuthContext.Provider value={{ signOut, userId, cognitoSignIn, cognitoCreateAccount, cognitoVerifyAccount, appleSignIn, googleSignIn, googleSignOut, userProfile, setUserProfile, jwtToken,  setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, refreshJwtToken, setRefreshToken, retrieveRefreshToken, deleteRefreshToken, temporaryJwtToken, setTemporaryJwtToken, temporaryRefreshToken, setTemporaryRefreshToken, checkIfStripeSubscribed }}>
             { children }
         </AuthContext.Provider>
     );

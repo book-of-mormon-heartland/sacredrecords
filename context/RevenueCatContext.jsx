@@ -96,7 +96,11 @@ export const RevenueCatProvider = ({ children }) => {
       }
     }
   }
-
+  
+  const revenueCatLogin = async(userId) => {
+    console.log("This is the userId in revenueCatLogin:" + userId);
+    const { customerInfo, created } = await Purchases.logIn(userId);
+  }
 
   const checkIfSubscribed = async () => {
     log("In checkIfSubscribed", "info");
@@ -152,6 +156,15 @@ export const RevenueCatProvider = ({ children }) => {
     }
   };
 
+  const logOutCognito = async() => {
+    try {
+      await Purchases.logOut();
+    } catch (error) {
+
+    }
+  }
+
+
   return (
     <RevenueCatContext.Provider
       value={{
@@ -163,6 +176,8 @@ export const RevenueCatProvider = ({ children }) => {
         purchaseMonthly,
         checkIfSubscribed,
         restore,
+        revenueCatLogin,
+        logOutCognito
       }}
     >
       {children}

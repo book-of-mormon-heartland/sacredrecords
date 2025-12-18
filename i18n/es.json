@@ -69,7 +69,7 @@
   "delete_profile_text": "Al eliminar tu información personal, se eliminan tu nombre, correo electrónico y Google Fotos de la tabla de usuarios. También se eliminan de la tabla de compras y suscripciones de la base de datos. El ID de usuario se conserva, ya que es necesario para el funcionamiento de la aplicación.",
   "unsubscribe_button_text": "Cancelar suscripción",
   "cancel_subscription_title" : "Cancelar suscripción",
-  "cancel_subscription_text" : "La Suscripción Maya Quetzal contiene registros y enseñanzas ancestrales de toda América. El 75 % de las ganancias se destina al Consejo de la Biorregión Maya Quetzal. Por favor, considere mantener su suscripción activa.",
+  "cancel_subscription_text" : "La suscripción a los Anales Sagrados incluye registros y enseñanzas ancestrales hallados en todo el continente americano. El 75% de los ingresos se destina a los esfuerzos de unificación tribal y a la difusión de estas enseñanzas en diversos eventos. Le agradecemos que considere mantener activa su suscripción. Su acceso a los registros se mantendrá hasta que finalice el período de su suscripción mensual.",
   "cancel_subscription_text_none" : "No estás suscrito.",
   "cancel_subscription_button" : "Cancelar suscripción",
   "cancel_subscription_text_not_needed" : "No estás suscrito",

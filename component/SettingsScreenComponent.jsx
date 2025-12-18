@@ -237,7 +237,7 @@ const SettingsScreenComponent = ( {navigation} ) => {
       <>
       <View  style={styles.container}>
         <Text style={styles.settingTitle}>{translate('unsubscribe')}</Text>
-        <Text style={styles.text}>{translate('unsubscribe_text')}</Text>
+        <Text style={styles.text}>{translate('cancel_subscription_text')}</Text>
         <TouchableOpacity style={styles.googleButton} onPress={() => cancelSubscription() }>
           <Text style={styles.googleButtonText}>{translate('unsubscribe_button_text')}</Text>
         </TouchableOpacity>

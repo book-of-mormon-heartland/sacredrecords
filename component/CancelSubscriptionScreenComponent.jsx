@@ -10,8 +10,6 @@ import RevenueCatUI from "react-native-purchases-ui";
 
 
 
-
-
 const CancelSubscriptionScreenComponent = ( {navigation} ) => {
 
   const { language, setLanguage, translate } = useI18n();
@@ -85,7 +83,7 @@ const CancelSubscriptionScreenComponent = ( {navigation} ) => {
     }
   }
 
-  const cancelAndroidStripeSubscription = async() => {
+  const cancelAndroidSubscription = async() => {
         //console.log("cancel subscription");
     // check all three values to see if there is content.
     if(jwtToken) {
@@ -137,48 +135,6 @@ const CancelSubscriptionScreenComponent = ( {navigation} ) => {
         </View>
       </ScrollView>
     );
-  } else if(!isIOS && isSubscribed && isStripeSubscribed)  {
-    
-    return (
-      <ScrollView>
-        <View style={styles.container}>
-
-
-          <Text>{translate('cancel_android_stripe_subscription_text')}</Text>
-          <Spacer size={20} /> 
-
-          <TouchableOpacity style={styles.submitButton} onPress={() => cancelAndroidStripeSubscription() }>
-            <Text style={styles.submitButtonText}>{translate('cancel_subscription_button')}</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.errorText}>{validationError}</Text>
-
-        </View>
-      </ScrollView>
-
-    );
-
-
-  } else if(!isIOS && isSubscribed && !isStripeSubscribed)  {
-    
-    return (
-      <ScrollView>
-        <View style={styles.container}>
-
-
-          <Text>{translate('cancel_android_revenue_cat_subscription_text')}</Text>
-          <Spacer size={20} /> 
-
-          <TouchableOpacity style={styles.submitButton} onPress={() => cancelAndroidRevenueCatSubscription() }>
-            <Text style={styles.submitButtonText}>{translate('cancel_subscription_button')}</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.errorText}>{validationError}</Text>
-        </View>
-      </ScrollView>
-
-    );
-
 
    } else if(!isIOS)  {
     
@@ -186,10 +142,10 @@ const CancelSubscriptionScreenComponent = ( {navigation} ) => {
       <ScrollView>
         <View style={styles.container}>
 
-          <Text>{translate('cancel_android_stripe_subscription_text')}</Text>
+          <Text>{translate('cancel_subscription_text')}</Text>
           <Spacer size={20} /> 
 
-          <TouchableOpacity style={styles.submitButton} onPress={() => cancelAndroidStripeSubscription() }>
+          <TouchableOpacity style={styles.submitButton} onPress={() => cancelAndroidSubscription() }>
             <Text style={styles.submitButtonText}>{translate('cancel_subscription_button')}</Text>
           </TouchableOpacity>
 
