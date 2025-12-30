@@ -126,7 +126,7 @@ const AndroidSubscriptionScreenComponent = ({route}) => {
           </View>
           <Text style={styles.text}>{translate('android_subscription_text')}</Text>
           <TouchableOpacity style={styles.submitButton} onPress={() => subscribe() }>
-            <Text style={styles.submitButtonText}>{translate('android_subscription_button')}(Testing)</Text>
+            <Text style={styles.submitButtonText}>{translate('android_subscription_button')}</Text>
           </TouchableOpacity>
           <Text style={styles.errorText}>{message}</Text>
         </View>

@@ -6,6 +6,9 @@ import { useI18n } from '.././context/I18nContext';
 import * as Keychain from 'react-native-keychain'; 
 import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import { RevenueCatContext } from '.././context/RevenueCatContext';
+import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
+
+
 
 
 
@@ -17,6 +20,7 @@ export const AuthProvider = ({ children }) => {
     const [message, setMessage] = useState("");
     const [userProfile, setUserProfile] = useState(undefined);
     const [userId, setUserId] = useState("");
+    const [idForRevenueCat, setIdForRevenueCat] = useState("");
     const [jwtToken, setJwtToken] = useState("");
     const [refreshToken, setRefreshToken] = useState("");
     const [temporaryJwtToken, setTemporaryJwtToken] = useState("");
@@ -42,35 +46,70 @@ export const AuthProvider = ({ children }) => {
     }
 */
     const saveJwtToken = async (token) => {
-        try {
-            await Keychain.setGenericPassword(
-            'jwtToken',
-            token,
-            {
-                accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED, // allows access when device is unlocked
-                storage: Keychain.STORAGE_TYPE.AES, // optional, modern storage backend
-                service: 'com.sacredrecords.jwt', // your unique key
+        if(isIOS) {
+            try {
+                await Keychain.setGenericPassword(
+                    'jwtToken',
+                    token,
+                    {
+                        accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED, // allows access when device is unlocked
+                        storage: Keychain.STORAGE_TYPE.AES, // optional, modern storage backend
+                        service: 'com.sacredrecords.jwt', // your unique key
+                    }
+                );
+                //console.log('JWT token saved successfully!');
+            } catch (error) {
+                console.error('Error saving JWT token:', error);
             }
-            );
-            //console.log('JWT token saved successfully!');
-        } catch (error) {
-            console.error('Error saving JWT token:', error);
+        }
+
+        if(!isIOS) {
+            try {
+                await Keychain.setGenericPassword(
+                    'jwtToken',
+                    token,
+                    {
+                        service: 'com.sacredrecords.jwt', // your unique key
+                        accessControl: Keychain.ACCESS_CONTROL.NONE,
+                    }
+                );
+                //console.log('JWT token saved successfully!');
+            } catch (error) {
+                console.error('Error saving JWT token:', error);
+            }
         }
     };
     const saveRefreshToken = async(token) => {
-        try {
-            await Keychain.setGenericPassword(
-            'refreshToken',
-            token,
-            {
-                accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED, // allows access when device is unlocked
-                storage: Keychain.STORAGE_TYPE.AES, // optional, modern storage backend
-                service: 'com.sacredrecords.refresh', // your unique key
+        if(isIOS) {
+            try {
+                await Keychain.setGenericPassword(
+                    'refreshToken',
+                    token,
+                    {
+                        accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED, // allows access when device is unlocked
+                        storage: Keychain.STORAGE_TYPE.AES, // optional, modern storage backend
+                        service: 'com.sacredrecords.refresh', // your unique key
+                    }
+                );
+                //console.log('JWT token saved successfully!');
+            } catch (error) {
+                console.error('Error saving JWT token:', error);
             }
-            );
-            //console.log('JWT token saved successfully!');
-        } catch (error) {
-            console.error('Error saving JWT token:', error);
+        }
+        if(!isIOS) {
+            try {
+                await Keychain.setGenericPassword(
+                    'refreshToken',
+                    token,
+                    {
+                        service: 'com.sacredrecords.jwt', // your unique key
+                        accessControl: Keychain.ACCESS_CONTROL.NONE,
+                    }
+                );
+                //console.log('JWT token saved successfully!');
+            } catch (error) {
+                console.error('Error saving JWT token:', error);
+            }
         }
     }
 
@@ -125,39 +164,43 @@ export const AuthProvider = ({ children }) => {
 
 
     const refreshJwtToken = async () => {
-       console.log("in refreshJwtToken");
-        try {
-            const postResponse = await fetch(serverUrl + "/authentication/refreshJwtToken", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwtToken}`
-                },
-                body: JSON.stringify({ 
-                    jwtToken: jwtToken, 
-                    refreshToken: refreshToken,
-                }),
-            });
-            if (!postResponse.ok) {
-                console.log("It was an error");
-                //throw new Error(`HTTP error! status: ${postResponse.status}`);
+        console.log("in refreshJwtToken");
+        const myJwtToken = await retrieveJwtToken();
+        if(myJwtToken) {
+            try {
+                const postResponse = await fetch(serverUrl + "/authentication/refreshJwtToken", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${myJwtToken}`
+                    },
+                    body: JSON.stringify({ 
+                        jwtToken: myJwtToken, 
+                        refreshToken: refreshToken,
+                    }),
+                });
+                if (!postResponse.ok) {
+                    console.log("It was an error");
+                    //throw new Error(`HTTP error! status: ${postResponse.status}`);
+                }
+                //console.log("refreshJwtToken returned");
+                const responseData = await postResponse.json();
+                const obj = JSON.parse(responseData);
+                //console.log(obj);
+                
+                if(obj.message==="update-jwt-token") {
+                  //console.log("This is the new jwtToken: " +  obj.jwtToken);
+                  setJwtToken(obj.jwtToken);
+                  await saveJwtToken(obj.jwtToken);
+                  return obj;
+                }
+            } catch (error) {
+                //console.error('Error:', error);
+                return JSON.stringify({
+                    message: "failure to update",
+                    jwtToken: ""
+                });
             }
-            //console.log("refreshJwtToken returned");
-            const responseData = await postResponse.json();
-            const obj = JSON.parse(responseData);
-            //console.log(obj);
-            
-            if(obj.message==="update-jwt-token") {
-              //console.log("This is the new jwtToken: " +  obj.jwtToken);
-              setJwtToken(obj.jwtToken);
-              return obj;
-            }
-        } catch (error) {
-            //console.error('Error:', error);
-            return JSON.stringify({
-                message: "failure to update",
-                jwtToken: ""
-            });
         }
     }
 
@@ -176,13 +219,21 @@ export const AuthProvider = ({ children }) => {
             deleteRefreshToken();
             setTemporaryJwtToken("");
             setTemporaryRefreshToken("");
-            try {
-                await GoogleSignin.signOut();
-                setMessage('Not Signed In'); 
-            } catch (error) {
+            if(isIOS) {
+                try {
+                    await GoogleSignin.signOut();
+                    setMessage('Not Signed In'); 
+                } catch (error) {
 
+                }
             }
-
+            if(!isIOS) {
+                // facebook logout
+                try {
+                    LoginManager.logOut();
+                } catch (error) {
+                }
+            }
             // need to do GoogleSignin.disconnect also.
         } catch (error) {
             console.log('Google Sign-Out Error: ', error);
@@ -435,7 +486,7 @@ export const AuthProvider = ({ children }) => {
         //let appUser = {};
         const user = new CognitoUser({ Username, Pool: userPool });
         const authDetails = new AuthenticationDetails({ Username, Password });
-        console.log(user);
+        //console.log(user);
 
         const authenticatedUser = await new Promise((resolve, reject) => {
             user.authenticateUser(authDetails, {
@@ -444,8 +495,8 @@ export const AuthProvider = ({ children }) => {
                     const refreshToken = session.getRefreshToken().getToken();
                     const accessToken = session.getAccessToken().getJwtToken();
                     resolve({ idToken, accessToken, refreshToken });
-                    console.log("user")
-                    console.log(user);
+                    //console.log("user")
+                    //console.log(user);
                 },
                 onFailure: (err) => {
                     console.log("Failed to login");
@@ -481,6 +532,7 @@ export const AuthProvider = ({ children }) => {
             console.log("userId");
             console.log(obj.user.id);
             setUserId(obj.user.id)
+            setIdForRevenueCat(obj.user.idForRevenueCat);
 
 
             if(obj?.jwtToken) {
@@ -493,7 +545,7 @@ export const AuthProvider = ({ children }) => {
                 saveRefreshToken(obj.refreshToken);
                 setTemporaryJwtToken("");
                 setTemporaryRefreshToken("");
-                return "true";
+                return obj.user.idForRevenueCat;
             } else {
                 //console.log("No JWT Token returned from server.");
                 setJwtToken("");
@@ -625,8 +677,87 @@ export const AuthProvider = ({ children }) => {
     }
 
 
+    const facebookSignIn = async (fb_token) => {
+       //console.log("facebookSignIn");
+        // here we go to the server.  If we got here, the sign in was successful.
+       // console.log("Authenticated User:");
+       /*
+{
+  app_id: '1680843936658382',
+  type: 'USER',
+  application: 'Sacred Records',
+  data_access_expires_at: 1774228048,
+  expires_at: 1771621217,
+  is_valid: true,
+  issued_at: 1766452048,
+  metadata: { auth_type: 'rerequest', sso: 'chrome_custom_tab' },
+  scopes: [ 'email', 'openid', 'public_profile' ],
+  user_id: '10240066632071655'
+}
+       */
+       // console.log(authenticatedUser.idToken);
+        try {
+            const postResponse = await fetch(serverUrl + "/authentication/facebookLogin", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: fb_token }),
+            });
+            if (!postResponse.ok) {
+
+                console.log("Response not ok");
+                throw new Error(`HTTP error! status: ${postResponse.status}`);
+            }
+            const responseData = await postResponse.json();
+            const obj = JSON.parse(responseData);
+            //console.log("Login Obj response.user");
+            //console.log(obj);
+            //appUser=obj.user;
+            if(obj?.language && (obj.language != "")) {
+                setLanguage(obj.language);
+            }
+            //console.log("IdForRevenueCat:");
+            //console.log(obj.idForRevenueCat);
+            //setUserId(obj.user.id)
+            setIdForRevenueCat(obj.idForForRevenueCat);
+
+
+            if(obj?.jwtToken) {
+                //console.log("We have the jwttoken and signing in the user.");
+                setJwtToken(obj.jwtToken || "");
+                setRefreshToken(obj.refreshToken || "");
+                setMessage("Logged In Successfully");
+                setUserProfile(obj.user);
+                saveJwtToken(obj.jwtToken);
+                saveRefreshToken(obj.refreshToken);
+                setTemporaryJwtToken("");
+                setTemporaryRefreshToken("");
+                return obj.idForRevenueCat;
+            } else {
+                //console.log("No JWT Token returned from server.");
+                setJwtToken("");
+                setRefreshToken("");
+                setMessage("Not Logged In");
+                setUserProfile();
+                deleteJwtToken();
+                deleteRefreshToken();
+                setTemporaryJwtToken("");
+                setTemporaryRefreshToken("");
+                return false;
+            }
+            
+        } catch (error) {
+            console.log("We got some error here.")
+            console.error('Error:', error);
+            return false;
+        }
+        //return appUser;
+    };
+
+
     return (
-        <AuthContext.Provider value={{ signOut, userId, cognitoSignIn, cognitoCreateAccount, cognitoVerifyAccount, appleSignIn, googleSignIn, googleSignOut, userProfile, setUserProfile, jwtToken,  setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, refreshJwtToken, setRefreshToken, retrieveRefreshToken, deleteRefreshToken, temporaryJwtToken, setTemporaryJwtToken, temporaryRefreshToken, setTemporaryRefreshToken, checkIfStripeSubscribed }}>
+        <AuthContext.Provider value={{ signOut, userId, idForRevenueCat, facebookSignIn, cognitoSignIn, cognitoCreateAccount, cognitoVerifyAccount, appleSignIn, googleSignIn, googleSignOut, userProfile, setUserProfile, jwtToken,  setJwtToken, saveJwtToken, retrieveJwtToken, deleteJwtToken, refreshJwtToken, setRefreshToken, retrieveRefreshToken, deleteRefreshToken, temporaryJwtToken, setTemporaryJwtToken, temporaryRefreshToken, setTemporaryRefreshToken, checkIfStripeSubscribed }}>
             { children }
         </AuthContext.Provider>
     );

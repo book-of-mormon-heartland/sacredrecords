@@ -20,7 +20,6 @@ const BookmarksScreenComponent = ( {route} ) => {
   const [error, setError] = useState(null);
   const [showSignIn, setShowSignIn] = useState(true);
   
-  const [displaySignin, setDisplaySignin] = useState(true);
   const navigation = useNavigation();
   const isIOS = ( Platform.OS === 'ios' );
   let serverUrl = Environment.NODE_SERVER_URL;
@@ -31,6 +30,11 @@ const BookmarksScreenComponent = ( {route} ) => {
   const listWidth = width*0.9;
   const itemWidth = width*0.75;
   const trashWidth = width*0.15;
+
+
+  const renewTokens = async() => {
+    const tokenRefreshObj = await refreshJwtToken();
+  }
 
 
   const renderItem = ({ item }) => {
@@ -134,14 +138,12 @@ const BookmarksScreenComponent = ( {route} ) => {
       setShowSignIn(false);
     } else {
       setShowSignIn(true);
-      setDisplaySignin(true);
       setLoading(false);
     }
 
     if(!myJwtToken) {
       //we are not going to do anything except display a signin button.
     } else {
-      setDisplaySignin(false);
       try {
         const response = await fetch(apiEndpoint, {
           method: 'GET',
@@ -150,18 +152,7 @@ const BookmarksScreenComponent = ( {route} ) => {
           }
         });
         if (!response.ok) {
-          if(response.status === 500) {
-            const tokenRefreshObj = await refreshJwtToken();
-            if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
-              setJwtToken(tokenRefreshObj.jwtToken);
-              await saveJwtToken(tokenRefreshObj.jwtToken);
-              fetchData();
-            } else {
-              // its been a week.  Login from this location.
-              setJwtToken();
-              await deleteJwtToken();
-            }
-          }
+          console.log("not okay");
         } else {
           const json = await response.json();
           console.log("bookmarks data");
@@ -199,12 +190,12 @@ const BookmarksScreenComponent = ( {route} ) => {
         if(response.status === 500) {
           const tokenRefreshObj = await refreshJwtToken();
           if(tokenRefreshObj.message === "valid-token" || tokenRefreshObj.message === "update-jwt-token") {
-            setJwtToken(tokenRefreshObj.jwtToken);
+            await setJwtToken(tokenRefreshObj.jwtToken);
             await saveJwtToken(tokenRefreshObj.jwtToken);
             fetchData();
           } else {
             // its been a week.  Login from this location.
-            setJwtToken();
+            await setJwtToken();
             await deleteJwtToken();
           }
         }
@@ -227,6 +218,7 @@ const BookmarksScreenComponent = ( {route} ) => {
     React.useCallback(() => {
       console.log("in use focus effect");
       const loadData = async () => {
+        await renewTokens()
         await fetchData();
       };
       loadData();

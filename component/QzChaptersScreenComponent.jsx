@@ -31,9 +31,13 @@ const QzChapterScreenComponent = ( {route} ) => {
   }
   const { width } = useWindowDimensions();
   const listWidth = width*0.9;
+
   
 
 
+  const renewTokens = async() => {
+    const tokenRefreshObj = await refreshJwtToken();
+  }
 
   const renderItem = ({ item }) => {
     return(
@@ -172,6 +176,7 @@ const QzChapterScreenComponent = ( {route} ) => {
         navigation.setOptions({
             title: title,
         });
+        await renewTokens();
         await fetchData();
       };
       loadData();

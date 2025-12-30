@@ -33,6 +33,9 @@ const QzBookScreenComponent = ( {route} ) => {
 
 
 
+  const renewTokens = async() => {
+    const tokenRefreshObj = await refreshJwtToken();
+  }
 
   const handlePress = (id, title) => {
     //console.log("this is id " + id)
@@ -157,6 +160,7 @@ const QzBookScreenComponent = ( {route} ) => {
         navigation.setOptions({
             title: title,
         });
+        await renewTokens();
         await fetchData();
       };
       loadData();

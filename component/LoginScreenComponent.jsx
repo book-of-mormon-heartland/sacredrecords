@@ -3,13 +3,16 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Ale
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
+import { RevenueCatContext } from '.././context/RevenueCatContext.jsx';
 import { Platform } from 'react-native';
 import { useI18n } from '.././context/I18nContext'; 
 import { AppleButton, appleAuth } from '@invertase/react-native-apple-authentication';
 import { useNavigation, navigate } from '@react-navigation/native';
 import CognitoLoginScreenComponent from './CognitoLoginScreenComponent.jsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FacebookAuthProvider, signInWithCredential } from '@react-native-firebase/auth';
 import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
+import auth from '@react-native-firebase/auth'; // Import the default auth instance
 
 
 
@@ -18,16 +21,26 @@ const LoginScreenComponent = ( {route} ) => {
 
   const  envValue = Environment.GOOGLE_IOS_CLIENT_ID;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
-  const { googleSignIn, appleSignIn, cognitoSignIn } = useContext(AuthContext);
+  const { googleSignIn, appleSignIn, cognitoSignIn, facebookSignIn, idForRevenueCat } = useContext(AuthContext);
+  const { revenueCatLogin } = useContext(RevenueCatContext);
   const isIOS = ( Platform.OS === 'ios' );
   const { language, setLanguage, translate } = useI18n();
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const [showPassword, setShowPassword] = useState(false);
-  
+  const [message, setMessage] = useState("");  
 
   useEffect(() => {
   }, []); 
+
+
+  const handleFacebookSignIn = async () => {
+    try {
+     await loginWithFacebook();
+    } catch (err) {
+      console.log('Facebook sign-in failed', err);
+    }
+  };
 
   const loginWithFacebook = async () => {
     let result;
@@ -45,23 +58,41 @@ const LoginScreenComponent = ( {route} ) => {
 
       // get access token
       const data = await AccessToken.getCurrentAccessToken();
-
       if (!data) {
         Alert.alert('Something went wrong obtaining access token');
         return;
       }
-
       const fbAccessToken = data.accessToken.toString();
+      // make rest call to server to validate the token.
+      const loginData = await facebookSignIn(fbAccessToken);
+      console.log("loginData");
+      console.log(loginData);
+      if(loginData != false) {
+        setMessage("Successfully logged in with Facebook!");
+      }
+
+
+      try {
+        if(loginData != false) {
+          revenueCatLogin(loginData);
+        }
+      } catch (error) {
+        console.log("error on revenueCatLogin");
+        console.log(error);
+      }
+      //navigation.goBack();
+      setTimeout(() => {
+        navigation.goBack(); // Navigate back to the previous screen
+      }, 1500)
 
       // 👉 send this token to your backend
       // your backend exchanges it with Facebook for user profile info
-      
       console.log('Facebook Access Token:', fbAccessToken);
+      //Alert.alert('Logged in with Facebook!');
 
-      Alert.alert('Logged in with Facebook!');
     } catch (error) {
       console.log('Facebook Login Error', error);
-      Alert.alert('Login error');
+      //Alert.alert('Login error');
     }
   };
 
@@ -170,11 +201,20 @@ const LoginScreenComponent = ( {route} ) => {
     // android, no apple button.
     return (
       <View style={styles.loginContainer}>
-
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>{translate('greeting')}</Text>
         <Image source={require('.././assets/sacred-records-logo-200x200.png')} style={styles.loginScreenImage} />
 
-       
+        <TouchableOpacity
+          style={styles.facebookButton}
+          onPress={handleFacebookSignIn}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.facebookText}>
+            Sign in with Facebook
+          </Text>
+        </TouchableOpacity>
+        <Text style={styles.warningText}>{message}</Text>
+
         <CognitoLoginScreenComponent />
         <Text style={styles.bottomText}>{translate("login_issue")}</Text>
       </View>
@@ -311,7 +351,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12
   },
-
+  facebookButton: {
+    backgroundColor: '#1877F2', // Facebook blue
+    paddingVertical: 5,
+    borderRadius: 8,
+    alignItems: 'center',
+    paddingLeft: 20,
+    paddingRight: 20,
+    marginTop: 20,
+  },
+  facebookText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
 
 });
 

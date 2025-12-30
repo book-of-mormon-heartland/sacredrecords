@@ -27,6 +27,11 @@ const BookScreenComponent = ( {route} ) => {
   const listWidth = width*0.9;
 
 
+  const renewTokens = async() => {
+    const tokenRefreshObj = await refreshJwtToken();
+  }
+
+
   const handlePress = (id, title) => {
     console.log("this is id " + id)
     navigation.navigate('Chapters', {
@@ -85,16 +90,24 @@ const BookScreenComponent = ( {route} ) => {
     }
   };
 
+
   useFocusEffect(
     React.useCallback(() => {
-      navigation.setOptions({
-          title: title,
-      });
-      fetchData();
-      return () => {
+      const loadData = async () => {
+        navigation.setOptions({
+            title: title,
+        });
+        await renewTokens();
+        await fetchData();
       };
-    }, [])
+      loadData();
+      return () => {
+        // cleanup logic
+      };
+    }, [jwtToken]) // Dependencies array
   );
+
+
 
   const styles = StyleSheet.create({
     container: {

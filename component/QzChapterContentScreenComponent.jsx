@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useContext, useEffect, useState, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated, Image, TouchableOpacity, Alert,  ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Animated, Image, TouchableOpacity, Alert,  ActivityIndicator,  useWindowDimensions } from 'react-native';
 var Environment = require('.././context/environment.ts');
 import { ThemeContext } from '.././context/ThemeContext';
 import { AuthContext } from '.././context/AuthContext';
@@ -40,8 +40,19 @@ const QzChapterContentScreenComponent = ( {route}) => {
   const [currentY, setCurrentY] = useState(0);
   const scrollViewRef = useRef(null);
   const [bookmarkChapterId, setBookmarkChapterId] = useState("");
+  const { width } = useWindowDimensions();
+  let paragraphFontSize = 16;
+  let titleFontSize = 20;
+  // tablet
+  if(width > 450) {
+    paragraphFontSize = 26;
+    titleFontSize = 30;
+  } 
   
   
+  const renewTokens = async() => {
+    const tokenRefreshObj = await refreshJwtToken();
+  }
 
   const fetchData = async (id) => {
     console.log("fetch data for qzChapterContentScreenComponent");
@@ -198,6 +209,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
   useFocusEffect(
     React.useCallback(() => {
       const fetchDataAndScroll = async () => {
+        await renewTokens();
         await fetchData(id);
         if(fetchBookmark=="yes") {
           await retrieveBookmark(bookId);
@@ -360,6 +372,97 @@ const QzChapterContentScreenComponent = ( {route}) => {
     ));
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 10,
+      backgroundColor: "#fff",
+      color: "#000",
+      borderRadius: 8,
+      margin: 5,
+      marginBottom: 20,
+    },
+    paragraphContainer: {
+      marginBottom: 16,
+      justifyContent: 'top',
+    },
+    paragraphText: {
+      fontSize: paragraphFontSize,
+      lineHeight: 24,
+      color: '#333',
+      justifyContent: 'top',
+      alignItems: 'left',
+
+    },
+    chapterTitle: {
+      fontSize: titleFontSize,
+      fontWeight: 'bold',
+      padding: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    subTitle: {
+      fontSize: paragraphFontSize,
+      color: '#666',
+      fontStyle: 'italic',
+      padding: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    poemLine: {
+      fontSize: paragraphFontSize,
+      fontStyle: 'italic',
+      lineHeight: 22,
+      paddingLeft: 20,
+    },
+    navigationContainer: {
+      flexDirection: 'row', // Aligns children horizontally
+      justifyContent: 'center', // Centers children horizontally within the container
+      alignItems: 'center', // Centers children vertically
+      marginTop: 20,
+    },
+    button: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginHorizontal: 10,
+      marginBottom: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 15,
+      borderRadius: 8,
+      backgroundColor: '#EFEFEF', // Light gray background
+    },
+    buttonText: {
+      marginLeft: 5,
+      marginRight: 5,
+      color: '#007AFF',
+      fontWeight: '600',
+    },
+    floatingButton: {
+      position: 'absolute',
+      bottom: 30, // Adjust these values as needed
+      right: 30,  // Adjust these values as needed
+      backgroundColor: '#007BFF',
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 8, // for Android shadow
+      shadowColor: '#000', // for iOS shadow
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
+    },
+    signInButtonText: {
+      alignSelf: 'flex-end' 
+    }
+  });
+
+
+
+
+
+
   const renderFormattedText = (text) => {
     // Base case: if no markdown is found, return the text as is.
     if (!text.includes('**') && !text.includes('*')) {
@@ -403,6 +506,7 @@ const QzChapterContentScreenComponent = ( {route}) => {
       </View>
     );
   }
+
 
 
   return (
@@ -491,90 +595,5 @@ const QzChapterContentScreenComponent = ( {route}) => {
   
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: "#fff",
-    color: "#000",
-    borderRadius: 8,
-    margin: 5,
-    marginBottom: 20,
-  },
-  paragraphContainer: {
-    marginBottom: 16,
-    justifyContent: 'top',
-  },
-  paragraphText: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#333',
-    justifyContent: 'top',
-    alignItems: 'left',
-
-  },
-  chapterTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    padding: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  subTitle: {
-    fontSize: 14,
-    color: '#666',
-    fontStyle: 'italic',
-    padding: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  poemLine: {
-    fontSize: 16,
-    fontStyle: 'italic',
-    lineHeight: 22,
-    paddingLeft: 20,
-  },
-  navigationContainer: {
-    flexDirection: 'row', // Aligns children horizontally
-    justifyContent: 'center', // Centers children horizontally within the container
-    alignItems: 'center', // Centers children vertically
-    marginTop: 20,
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 10,
-    marginBottom: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    backgroundColor: '#EFEFEF', // Light gray background
-  },
-  buttonText: {
-    marginLeft: 5,
-    marginRight: 5,
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-  floatingButton: {
-    position: 'absolute',
-    bottom: 30, // Adjust these values as needed
-    right: 30,  // Adjust these values as needed
-    backgroundColor: '#007BFF',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 8, // for Android shadow
-    shadowColor: '#000', // for iOS shadow
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-  },
-  signInButtonText: {
-    alignSelf: 'flex-end' 
-  }
-});
 
 export default QzChapterContentScreenComponent;

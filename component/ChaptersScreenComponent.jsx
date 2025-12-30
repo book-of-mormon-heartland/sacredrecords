@@ -27,8 +27,11 @@ const ChapterScreenComponent = ( {route} ) => {
   }
   const { width } = useWindowDimensions();
   const listWidth = width*0.9;
-  
 
+
+  const renewTokens = async() => {
+    const tokenRefreshObj = await refreshJwtToken();
+  }
 
 
   const renderItem = ({ item }) => {
@@ -91,17 +94,40 @@ const ChapterScreenComponent = ( {route} ) => {
     }
   }
 
+  /*
   useFocusEffect(
-    React.useCallback(() => {
-      navigation.setOptions({
-          title: title,
-      });
-
-      fetchData();
+    React.useCallback(async() => {
+      const loadData = async () => {
+        navigation.setOptions({
+            title: title,
+        });
+        await renewTokens();
+        await fetchData();
+      }
+      await loadData();  
       return () => {
       };
-    }, [])
+    }, [jwtToken])
   );
+*/
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadData = async () => {
+        navigation.setOptions({
+            title: title,
+        });
+        await renewTokens();
+        await fetchData();
+      };
+      loadData();
+      return () => {
+        // cleanup logic
+      };
+    }, [jwtToken]) // Dependencies array
+  );
+  
 
   const styles = StyleSheet.create({
     container: {

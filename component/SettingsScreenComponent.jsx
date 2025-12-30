@@ -31,6 +31,12 @@ const SettingsScreenComponent = ( {navigation} ) => {
     serverUrl = Environment.IOS_NODE_SERVER_URL;
   }
 
+
+  const renewTokens = async() => {
+    const tokenRefreshObj = await refreshJwtToken();
+  }
+
+
   const updateProfile = () => {
     navigation.navigate('EditProfile', {});
   }
@@ -100,6 +106,7 @@ const SettingsScreenComponent = ( {navigation} ) => {
   useFocusEffect(
     React.useCallback(() => {
       const loadData = async () => {
+        await renewTokens();
         const myJwtToken = await retrieveJwtToken();
         const isSubscribed = await checkIfSubscribed();
         setIsSubscribed(isSubscribed);

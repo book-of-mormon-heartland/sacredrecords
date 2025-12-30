@@ -17,7 +17,7 @@ const CognitoLoginScreenComponent = ( {route} ) => {
 
     const navigation = useNavigation(); 
     
-    const {  userId, googleSignIn, cognitoSignIn, userProfile } = useContext(AuthContext);
+    const {  userId, idForRevenueCat, googleSignIn, cognitoSignIn, userProfile } = useContext(AuthContext);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -47,12 +47,13 @@ const CognitoLoginScreenComponent = ( {route} ) => {
     const handleLogin = async () => {
         try {
             const tokens = await cognitoSignIn(username, password);
-            //console.log(tokens);
-            console.log("userid");
-            console.log(userId);
+            console.log("tokens");
+            console.log(tokens);
+            //console.log("idForRevenueCat:");
+            //console.log(idForRevenueCat);
             setMessage("Welcome Back " + username + "!");
             try {
-              revenueCatLogin(userId);
+              revenueCatLogin(tokens);
             } catch (error) {
               console.log("error on revenueCatLogin");
               console.log(error);

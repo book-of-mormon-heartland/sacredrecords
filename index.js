@@ -10,11 +10,10 @@ var Environment = require('./context/environment.ts');
 import { Platform } from 'react-native';
 
 
-
-
 //console.log("Web client id");
 //console.log(Environment.GOOGLE_WEB_CLIENT_ID);
 const isIOS = ( Platform.OS === 'ios' );
+//var serviceAccount = require("certs/serviceAccountKey.json");
 
 
 let GOOGLE_WEB_CLIENT_ID='376185747738-hced54r8i2jc4bjq428i54dp2g4uhnvo.apps.googleusercontent.com';

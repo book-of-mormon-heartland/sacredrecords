@@ -28,9 +28,12 @@ const BookshelfScreenComponent = ( ) => {
   const listWidth = width*0.9;
 
   
+  const renewTokens = async() => {
+    const tokenRefreshObj = await refreshJwtToken();
+  }
 
   const fetchData = async () => {
-    //console.log("doing fetch data");
+    console.log("doing fetch data");
     const  apiEndpoint = serverUrl + "/books/Bookshelf"; // Example endpoint
     const myJwtToken = await retrieveJwtToken();
     //let jwtToken = "";
@@ -45,14 +48,17 @@ const BookshelfScreenComponent = ( ) => {
       //if(!jwtToken){
       //  jwtToken = "";
       //} 
+      console.log(apiEndpoint);
+
       const response = await fetch(apiEndpoint, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${jwtToken}`
-        }
+          'Authorization': `Bearer ${myJwtToken}`
+        }      
       });
       if (!response.ok) {
         console.log("not okay");
+        console.log(response);
         if(response.status === 500) {
           const tokenRefreshObj = await refreshJwtToken();
           if(tokenRefreshObj?.message === "valid-token" || tokenRefreshObj?.message === "update-jwt-token") {
@@ -67,7 +73,7 @@ const BookshelfScreenComponent = ( ) => {
         }
       } else {
         const json = await response.json();
-        //console.log(json);
+        console.log(json);
         setData(json);
       }
     } catch (error) {
@@ -78,14 +84,30 @@ const BookshelfScreenComponent = ( ) => {
       setLoading(false);
     }
   };
-
+/*
   useFocusEffect(
-    React.useCallback(() => {
-      fetchData();
+    React.useCallback( async() => {
+      await fetchData();
       return () => {
       };
     }, [jwtToken])
   );
+*/
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadData = async () => {
+        await renewTokens();
+        await fetchData();
+      };
+      loadData();
+
+      return () => {
+        // cleanup logic
+      };
+    }, [jwtToken]) // Dependencies array
+  );
+
+
 
   const signInToApp = () => {
       navigation.navigate('SignIn');

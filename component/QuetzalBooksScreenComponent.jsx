@@ -19,7 +19,7 @@ const QuetzalBookScreenComponent = ( {route} ) => {
   const  stripeCallback = Environment.STRIPE_CALLBACK;
   const { theme, setTheme, toggleTheme } = useContext(ThemeContext);
   const { log } = useContext(UtilitiesContext);
-  const { jwtToken, retrieveJwtToken,  checkIfStripeSubscribed } = useContext(AuthContext);
+  const { jwtToken, retrieveJwtToken,  checkIfStripeSubscribed, refreshJwtToken } = useContext(AuthContext);
   const { language, setLanguage, translate } = useI18n();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,7 +86,9 @@ const QuetzalBookScreenComponent = ( {route} ) => {
 
   };
 
-
+  const renewTokens = async() => {
+    const tokenRefreshObj = await refreshJwtToken();
+  }
 
   const fetchData = async () => {
 
@@ -181,7 +183,7 @@ const QuetzalBookScreenComponent = ( {route} ) => {
     React.useCallback(() => {
       console.log("in use focus effect");
       const loadData = async () => {
-        //await determineIfBannerNeeded();
+        renewTokens();
         await fetchData();
       };
       loadData();

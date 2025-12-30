@@ -98,12 +98,12 @@ export const RevenueCatProvider = ({ children }) => {
   }
   
   const revenueCatLogin = async(userId) => {
-    console.log("This is the userId in revenueCatLogin:" + userId);
+    //console.log("This is the userId in revenueCatLogin:" + userId);
     const { customerInfo, created } = await Purchases.logIn(userId);
   }
 
   const checkIfSubscribed = async () => {
-    log("In checkIfSubscribed", "info");
+    //log("In checkIfSubscribed", "info");
     if(!initialized) {
       await init();
     }
@@ -111,30 +111,29 @@ export const RevenueCatProvider = ({ children }) => {
     try {
       console.log("about to get customer info");
       if(!isIOS) {
-        log("In invalidatingCustomerInfoCache", "info");
-
-        await Purchases.invalidateCustomerInfoCache();
+        //log("In invalidatingCustomerInfoCache", "info");
+        //await Purchases.invalidateCustomerInfoCache();
       }
 
 
       const customerInfo = await Purchases.getCustomerInfo();
 
-      log(customerInfo, "info");
-      console.log("Checking hasProEntitlement");
-      log("checking hasProEntitlement", "info");
+      //log(customerInfo, "info");
+      //console.log("Checking hasProEntitlement");
+      //log("checking hasProEntitlement", "info");
 
       const hasProEntitlement = customerInfo.entitlements.active['Sacred Records Pro']?.isActive;
-      log(hasProEntitlement, "info");
-      console.log(hasProEntitlement);
+      //log(hasProEntitlement, "info");
+      //console.log(hasProEntitlement);
       if (hasProEntitlement) {
         // Grant access
-        log("Should be granted access", "info");
+        log("Should be granted access as hasProEntitlement", "info");
         return true;
       }
     } catch (error) {
-      log("got an error in checkIfSubscribed", "info")
+      //log("got an error in checkIfSubscribed", "info")
       console.error('Error fetching customer info:', error);
-      log(error, "info");
+      //log(error, "info");
       return false;
     }   
   };
